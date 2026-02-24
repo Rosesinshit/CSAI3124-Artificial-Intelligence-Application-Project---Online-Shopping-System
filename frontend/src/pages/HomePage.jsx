@@ -22,7 +22,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-xl text-gray-500">Loading...</div>
+        <div className="shimmer w-6 h-6 rounded-full" />
       </div>
     );
   }
@@ -36,35 +36,39 @@ export default function HomePage() {
         ogType="website"
       />
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:py-24">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">Welcome to ShopOnline</h1>
-            <p className="text-xl text-blue-100 mb-8">Discover amazing products at great prices</p>
-            <Link
-              to="/products"
-              className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-colors"
-            >
-              Shop Now
-            </Link>
-          </div>
+      <section className="bg-[#000] text-white">
+        <div className="max-w-[980px] mx-auto px-4 py-20 sm:py-28 text-center">
+          <h1 className="text-[40px] sm:text-[56px] leading-[1.05] font-semibold tracking-tight mb-3 animate-fade-in">
+            Shop smarter.
+          </h1>
+          <p className="text-lg sm:text-xl text-white/60 mb-8 animate-slide-up">
+            Discover amazing products at great prices.
+          </p>
+          <Link
+            to="/products"
+            className="btn-apple btn-apple-primary !px-7 !py-2.5 !text-sm animate-slide-up"
+          >
+            Shop Now
+          </Link>
         </div>
       </section>
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Shop by Category</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <section className="max-w-[980px] mx-auto px-4 py-14">
+          <h2 className="section-heading mb-8">Shop by Category</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {categories.map((cat) => (
               <Link
                 key={cat.category_id}
                 to={`/products?category=${cat.category_id}`}
-                className="bg-white rounded-lg shadow p-4 text-center hover:shadow-md transition-shadow"
+                className="glass-card !p-4 text-center hover:scale-[1.03] transition-transform duration-200"
               >
-                <div className="text-3xl mb-2">📦</div>
-                <h3 className="font-medium text-gray-700 text-sm">{cat.name}</h3>
-                <p className="text-xs text-gray-400">{cat.product_count} products</p>
+                <div className="w-8 h-8 mx-auto mb-2 rounded-xl bg-apple-gray-5 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-apple-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                </div>
+                <h3 className="text-xs font-medium text-apple-dark tracking-tight">{cat.name}</h3>
+                <p className="text-[10px] text-apple-gray mt-0.5">{cat.product_count} products</p>
               </Link>
             ))}
           </div>
@@ -72,18 +76,21 @@ export default function HomePage() {
       )}
 
       {/* Latest Products */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
+      <section className="max-w-[980px] mx-auto px-4 py-14">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Latest Products</h2>
-          <Link to="/products" className="text-blue-600 hover:text-blue-800 font-medium">View All →</Link>
+          <h2 className="section-heading !mb-0">Latest Products</h2>
+          <Link to="/products" className="text-apple-blue text-xs hover:underline inline-flex items-center gap-0.5">
+            View All
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <ProductCard key={product.product_id} product={product} />
           ))}
         </div>
         {products.length === 0 && (
-          <p className="text-center text-gray-500 py-12">No products available yet.</p>
+          <p className="text-center text-apple-gray py-12 text-sm">No products available yet.</p>
         )}
       </section>
     </div>

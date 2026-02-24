@@ -78,9 +78,9 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-screen flex flex-col bg-apple-gray-5">
               <Navbar />
-              <main className="flex-1">
+              <main className="flex-1 animate-fade-in">
                 <AppRoutes />
               </main>
               <Footer />

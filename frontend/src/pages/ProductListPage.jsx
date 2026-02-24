@@ -60,21 +60,21 @@ export default function ProductListPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-[980px] mx-auto px-4 py-10">
       <SEOHead
         title={activeCategoryName ? `${activeCategoryName} - ShopOnline` : 'All Products - ShopOnline'}
         description={activeCategoryName ? `Browse ${activeCategoryName} products at great prices.` : 'Browse our full product catalog.'}
         keywords={activeCategoryName ? `${activeCategoryName.toLowerCase()}, shopping, buy online` : 'products, shopping, buy online'}
         canonical={slug ? `/category/${slug}` : '/products'}
       />
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">{activeCategoryName || 'All Products'}</h1>
+      <h1 className="section-heading">{activeCategoryName || 'All Products'}</h1>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-3 mb-8">
         <select
           value={category}
           onChange={(e) => updateParam('category', e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 text-sm"
+          className="glass-input !w-auto !py-1.5 !text-xs"
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
@@ -85,7 +85,7 @@ export default function ProductListPage() {
         <select
           value={sort}
           onChange={(e) => updateParam('sort', e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 text-sm"
+          className="glass-input !w-auto !py-1.5 !text-xs"
         >
           <option value="newest">Newest First</option>
           <option value="price_asc">Price: Low to High</option>
@@ -95,12 +95,14 @@ export default function ProductListPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading...</div>
+        <div className="flex items-center justify-center py-20">
+          <div className="shimmer w-6 h-6 rounded-full" />
+        </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">No products found.</div>
+        <div className="text-center py-20 text-apple-gray text-sm">No products found.</div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((p) => <ProductCard key={p.product_id} product={p} />)}
           </div>
           <Pagination meta={meta} onPageChange={(p) => updateParam('page', p)} />

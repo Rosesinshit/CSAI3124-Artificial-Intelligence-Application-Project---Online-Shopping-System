@@ -97,20 +97,19 @@ export default function ProductDetailPage() {
     }
   };
 
-  if (loading) return <div className="text-center py-16 text-gray-500">Loading...</div>;
-  if (error && !product) return <div className="text-center py-16 text-red-500">{error}</div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="shimmer w-6 h-6 rounded-full" /></div>;
+  if (error && !product) return <div className="text-center py-20 text-apple-red text-sm">{error}</div>;
   if (!product) return null;
 
   const images = product.images || [];
   const primaryImage = images[selectedImage]?.image_url || 'https://via.placeholder.com/600x600?text=No+Image';
-  // Block U: Determine best price (considering promotional pricing)
   const promoPrice = product.promotional_price;
   const displayPrice = promoPrice || product.sale_price || product.price;
   const hasDiscount = parseFloat(displayPrice) < parseFloat(product.price);
   const inWishlist = user && isInWishlist(product.product_id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-[980px] mx-auto px-4 py-10">
       {/* Block Y: SEO Head with meta tags, Open Graph, and JSON-LD */}
       {seoData && (
         <SEOHead
@@ -139,26 +138,26 @@ export default function ProductDetailPage() {
       )}
 
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-6">
-        <Link to="/" className="hover:text-blue-600">Home</Link>
-        <span className="mx-2">/</span>
-        <Link to="/products" className="hover:text-blue-600">Products</Link>
+      <nav className="flex items-center gap-1 text-xs text-apple-gray mb-8">
+        <Link to="/" className="hover:text-apple-blue transition-colors">Home</Link>
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        <Link to="/products" className="hover:text-apple-blue transition-colors">Products</Link>
         {product.category_name && (
           <>
-            <span className="mx-2">/</span>
-            <Link to={`/products?category=${product.category_id}`} className="hover:text-blue-600">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            <Link to={`/products?category=${product.category_id}`} className="hover:text-apple-blue transition-colors">
               {product.category_name}
             </Link>
           </>
         )}
-        <span className="mx-2">/</span>
-        <span className="text-gray-800">{product.name}</span>
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        <span className="text-apple-dark">{product.name}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Image Gallery (B1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-14">
+        {/* Image Gallery */}
         <div>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+          <div className="glass rounded-3xl overflow-hidden mb-3">
             <img
               src={primaryImage}
               alt={images[selectedImage]?.alt_text || product.name}
@@ -167,13 +166,13 @@ export default function ProductDetailPage() {
             />
           </div>
           {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto p-1">
               {images.map((img, idx) => (
                 <button
                   key={img.image_id}
                   onClick={() => setSelectedImage(idx)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    idx === selectedImage ? 'border-blue-600' : 'border-gray-200 hover:border-gray-400'
+                  className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all duration-200 ${
+                    idx === selectedImage ? 'opacity-100 ring-2 ring-apple-blue ring-offset-2' : 'opacity-50 hover:opacity-75'
                   }`}
                 >
                   <img
@@ -190,17 +189,17 @@ export default function ProductDetailPage() {
 
         {/* Product Info */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{product.name}</h1>
-          <p className="text-sm text-gray-500 mb-4">SKU: {product.sku}</p>
+          <h1 className="text-[28px] font-semibold text-apple-dark tracking-tight leading-tight mb-1">{product.name}</h1>
+          <p className="text-xs text-apple-gray mb-5">SKU: {product.sku}</p>
 
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 mb-5">
               {product.tags.map((tag) => (
                 <Link
                   key={tag.tag_id}
                   to={`/search?tags=${tag.slug}`}
-                  className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs hover:bg-gray-200"
+                  className="glass !px-2.5 !py-0.5 !rounded-full text-[10px] text-apple-gray hover:text-apple-blue transition-colors"
                 >
                   #{tag.name}
                 </Link>
@@ -210,24 +209,25 @@ export default function ProductDetailPage() {
 
           {/* Price */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-3xl font-bold text-blue-600">${parseFloat(displayPrice).toFixed(2)}</span>
+            <span className="text-[28px] font-semibold text-apple-dark tracking-tight">${parseFloat(displayPrice).toFixed(2)}</span>
             {hasDiscount && (
               <>
-                <span className="text-xl text-gray-400 line-through">${parseFloat(product.price).toFixed(2)}</span>
-                <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm font-medium">
+                <span className="text-base text-apple-gray line-through">${parseFloat(product.price).toFixed(2)}</span>
+                <span className="bg-apple-red/10 text-apple-red px-2 py-0.5 rounded-full text-[10px] font-semibold">
                   {Math.round((1 - parseFloat(displayPrice) / parseFloat(product.price)) * 100)}% OFF
                 </span>
               </>
             )}
           </div>
 
-          {/* Block U: Promotional pricing badge */}
+          {/* Promotional pricing badge */}
           {product.promotional_price && product.promotion_name && (
-            <div className="mb-4">
-              <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-medium">
-                🏷️ {product.promotion_name}
+            <div className="mb-5">
+              <span className="inline-flex items-center gap-1.5 bg-apple-orange/10 text-apple-orange px-3 py-1 rounded-full text-xs font-medium">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                {product.promotion_name}
                 {product.promotion_end_date && (
-                  <span className="text-xs text-orange-500 ml-1">
+                  <span className="text-[10px] text-apple-orange/70 ml-0.5">
                     (ends {new Date(product.promotion_end_date).toLocaleDateString()})
                   </span>
                 )}
@@ -236,75 +236,93 @@ export default function ProductDetailPage() {
           )}
 
           {/* Stock */}
-          <div className="mb-6">
+          <div className="mb-5">
             {product.stock_quantity > 0 ? (
-              <span className="text-green-600 font-medium">✓ In Stock ({product.stock_quantity} available)</span>
+              <span className="inline-flex items-center gap-1.5 text-apple-green text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-apple-green" />
+                In Stock ({product.stock_quantity} available)
+              </span>
             ) : (
-              <span className="text-red-600 font-medium">✗ Out of Stock</span>
+              <span className="inline-flex items-center gap-1.5 text-apple-red text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-apple-red" />
+                Out of Stock
+              </span>
             )}
           </div>
 
           {/* Short Description */}
           {product.short_description && (
-            <p className="text-gray-600 mb-6">{product.short_description}</p>
+            <p className="text-sm text-apple-gray mb-6 leading-relaxed">{product.short_description}</p>
           )}
 
           {/* Add to Cart */}
           {product.stock_quantity > 0 && (
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center border border-gray-300 rounded-lg">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex items-center glass !rounded-xl overflow-hidden">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 hover:bg-gray-100"
+                  className="px-3 py-2 text-apple-gray hover:text-apple-dark transition-colors text-sm"
                 >
                   −
                 </button>
-                <span className="px-4 py-2 font-medium">{quantity}</span>
+                <span className="px-3 py-2 text-sm font-medium text-apple-dark">{quantity}</span>
                 <button
                   onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
-                  className="px-3 py-2 hover:bg-gray-100"
+                  className="px-3 py-2 text-apple-gray hover:text-apple-dark transition-colors text-sm"
                 >
                   +
                 </button>
               </div>
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 py-3 rounded-lg font-semibold text-white transition-colors ${
-                  addedToCart ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`flex-1 btn-apple ${
+                  addedToCart ? '!bg-apple-green !text-white' : 'btn-apple-primary'
+                } !py-2.5 text-sm`}
               >
-                {addedToCart ? '✓ Added to Cart' : '🛒 Add to Cart'}
+                {addedToCart ? (
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Added to Bag
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    Add to Bag
+                  </span>
+                )}
               </button>
             </div>
           )}
 
-          {/* Block U: Wishlist & Price Alert buttons */}
-          <div className="flex items-center gap-3 mb-6">
+          {/* Wishlist & Price Alert buttons */}
+          <div className="flex items-center gap-2 mb-5">
             <button
               onClick={handleWishlistToggle}
               disabled={wishlistLoading}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium border transition-colors ${
+              className={`flex items-center gap-1.5 btn-apple ${
                 inWishlist
-                  ? 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
-                  : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-              }`}
+                  ? '!bg-apple-red/10 !text-apple-red !border-apple-red/20'
+                  : 'btn-apple-secondary'
+              } !py-2 !text-xs`}
             >
-              {inWishlist ? '♥ In Wish List' : '♡ Add to Wish List'}
+              <svg className="w-4 h-4" fill={inWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              {inWishlist ? 'In Wish List' : 'Add to Wish List'}
             </button>
             <button
               onClick={() => setShowPriceAlert(!showPriceAlert)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-600 hover:bg-gray-50"
+              className="flex items-center gap-1.5 btn-apple btn-apple-secondary !py-2 !text-xs"
             >
-              🔔 Price Alert
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+              Price Alert
             </button>
           </div>
 
-          {/* Block U: Price Alert Form */}
+          {/* Price Alert Form */}
           {showPriceAlert && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-700 mb-2 font-medium">Set a target price to be notified when price drops</p>
+            <div className="glass rounded-2xl p-4 mb-5">
+              <p className="text-xs text-apple-dark mb-2 font-medium">Set a target price to be notified when the price drops</p>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500">$</span>
+                <span className="text-apple-gray text-sm">$</span>
                 <input
                   type="number"
                   step="0.01"
@@ -313,11 +331,11 @@ export default function ProductDetailPage() {
                   value={targetPrice}
                   onChange={(e) => setTargetPrice(e.target.value)}
                   placeholder={`Current: $${parseFloat(displayPrice).toFixed(2)}`}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="glass-input flex-1 !py-1.5 !text-xs"
                 />
                 <button
                   onClick={handleSetPriceAlert}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                  className="btn-apple btn-apple-primary !py-1.5 !px-4 !text-xs"
                 >
                   Set Alert
                 </button>
@@ -326,28 +344,29 @@ export default function ProductDetailPage() {
           )}
 
           {priceAlertSet && (
-            <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm mb-4">
-              ✓ Price alert set successfully! We'll notify you when the price drops.
+            <div className="bg-apple-green/10 text-apple-green p-3 rounded-xl text-xs mb-4 inline-flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              Price alert set! We'll notify you when the price drops.
             </div>
           )}
 
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">{error}</div>}
+          {error && <div className="bg-apple-red/10 text-apple-red p-3 rounded-xl text-xs mb-4">{error}</div>}
 
-          {/* Product Attributes (C1) */}
+          {/* Product Attributes */}
           {product.attributes && product.attributes.length > 0 && (
-            <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-800 mb-3">Specifications</h3>
-              <div className="space-y-2">
+            <div className="border-t border-apple-gray-4/50 pt-5">
+              <h3 className="text-sm font-semibold text-apple-dark tracking-tight mb-3">Specifications</h3>
+              <div className="space-y-1.5">
                 {product.attributes.map((attr) => (
-                  <div key={attr.attribute_id} className="flex">
-                    <span className="w-40 text-gray-500 text-sm font-medium flex-shrink-0">{attr.attribute_name}</span>
+                  <div key={attr.attribute_id} className="flex text-xs">
+                    <span className="w-36 text-apple-gray font-medium flex-shrink-0">{attr.attribute_name}</span>
                     {attr.is_html ? (
                       <span
-                        className="text-gray-700 text-sm"
+                        className="text-apple-dark"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(attr.attribute_value) }}
                       />
                     ) : (
-                      <span className="text-gray-700 text-sm">{attr.attribute_value}</span>
+                      <span className="text-apple-dark">{attr.attribute_value}</span>
                     )}
                   </div>
                 ))}
@@ -359,20 +378,20 @@ export default function ProductDetailPage() {
 
       {/* Full Description */}
       {product.description && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-12">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Product Description</h2>
+        <div className="glass rounded-2xl p-6 mb-14">
+          <h2 className="text-base font-semibold text-apple-dark tracking-tight mb-3">Product Description</h2>
           <div
-            className="prose max-w-none text-gray-600"
+            className="prose prose-sm max-w-none text-apple-gray [&_a]:text-apple-blue"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
           />
         </div>
       )}
 
-      {/* Related Products (C4) */}
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <h2 className="section-heading">Related Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {relatedProducts.map((p) => (
               <ProductCard key={p.product_id} product={p} />
             ))}
