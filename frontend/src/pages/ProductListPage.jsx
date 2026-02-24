@@ -1,0 +1,111 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams, useParams } from 'react-router-dom';
+import api from '../api';
+import ProductCard from '../components/ProductCard';
+import Pagination from '../components/Pagination';
+import SEOHead from '../components/SEOHead';
+
+export default function ProductListPage() {
+  const { slug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeCategoryName, setActiveCategoryName] = useState('');
+
+  const page = parseInt(searchParams.get('page')) || 1;
+  const category = searchParams.get('category') || '';
+  const sort = searchParams.get('sort') || 'newest';
+
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({ page, limit: 12, sort });
+
+    // If we have a slug from /category/:slug route, resolve it to category ID
+    const catPromise = api.get('/categories');
+
+    catPromise.then((catRes) => {
+      const allCats = catRes.data.data;
+      setCategories(allCats);
+
+      let categoryId = category;
+      if (slug) {
+        const matched = allCats.find(c => c.slug === slug);
+        if (matched) {
+          categoryId = matched.category_id;
+          setActiveCategoryName(matched.name);
+        }
+      } else if (categoryId) {
+        const matched = allCats.find(c => String(c.category_id) === String(categoryId));
+        setActiveCategoryName(matched ? matched.name : '');
+      } else {
+        setActiveCategoryName('');
+      }
+
+      if (categoryId) params.set('category', categoryId);
+      return api.get(`/products?${params}`);
+    }).then((prodRes) => {
+      setProducts(prodRes.data.data);
+      setMeta(prodRes.data.meta);
+    }).catch(console.error).finally(() => setLoading(false));
+  }, [page, category, sort, slug]);
+
+  const updateParam = (key, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set(key, value);
+    else params.delete(key);
+    if (key !== 'page') params.set('page', '1');
+    setSearchParams(params);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <SEOHead
+        title={activeCategoryName ? `${activeCategoryName} - ShopOnline` : 'All Products - ShopOnline'}
+        description={activeCategoryName ? `Browse ${activeCategoryName} products at great prices.` : 'Browse our full product catalog.'}
+        keywords={activeCategoryName ? `${activeCategoryName.toLowerCase()}, shopping, buy online` : 'products, shopping, buy online'}
+        canonical={slug ? `/category/${slug}` : '/products'}
+      />
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">{activeCategoryName || 'All Products'}</h1>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <select
+          value={category}
+          onChange={(e) => updateParam('category', e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-sm"
+        >
+          <option value="">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={sort}
+          onChange={(e) => updateParam('sort', e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-sm"
+        >
+          <option value="newest">Newest First</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+          <option value="name">Name: A-Z</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-16 text-gray-500">Loading...</div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">No products found.</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {products.map((p) => <ProductCard key={p.product_id} product={p} />)}
+          </div>
+          <Pagination meta={meta} onPageChange={(p) => updateParam('page', p)} />
+        </>
+      )}
+    </div>
+  );
+}
