@@ -37,73 +37,74 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">My Orders</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading">My Orders</h1>
 
-      {/* Status Filters (B3) */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Status Filters */}
+      <div className="flex flex-wrap gap-2 mb-8">
         {STATUSES.map((s) => (
           <button
             key={s}
             onClick={() => updateFilter('status', s)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
               status === s
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-100'
+                ? 'bg-apple-dark text-white'
+                : 'text-apple-gray hover:bg-black/[0.04]'
             }`}
           >
-            {s === 'ALL' ? 'All Orders' : s}
+            {s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase()}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading...</div>
+        <div className="flex items-center justify-center py-20">
+          <div className="shimmer w-6 h-6 rounded-full" />
+        </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500 text-lg mb-4">No orders found</p>
-          <Link to="/products" className="text-blue-600 hover:underline">Start Shopping</Link>
+        <div className="text-center py-20">
+          <p className="text-apple-gray text-sm mb-5">No orders found.</p>
+          <Link to="/products" className="btn-apple btn-apple-primary text-sm">Start Shopping</Link>
         </div>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {orders.map((order) => (
               <Link
                 key={order.order_id}
                 to={`/orders/${order.order_id}`}
-                className="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                className="block glass-card !p-5"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <span className="font-semibold text-gray-800">Order #{order.order_number}</span>
-                    <span className="text-sm text-gray-500 ml-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-apple-dark">#{order.order_number}</span>
+                    <span className="text-xs text-apple-gray">
                       {new Date(order.order_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                   <OrderStatusBadge status={order.status} />
                 </div>
 
-                {/* Order Items Preview */}
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-2 mb-3">
                   {order.items?.slice(0, 3).map((item) => (
                     <div key={item.order_item_id} className="flex items-center gap-2">
                       <img
                         src={item.image_url || 'https://via.placeholder.com/40x40?text=Img'}
                         alt={item.product_name}
-                        className="w-10 h-10 rounded object-cover"
+                        className="w-9 h-9 rounded-lg object-cover bg-apple-gray-5"
                         onError={(e) => { e.target.src = 'https://via.placeholder.com/40x40?text=Img'; }}
                       />
-                      <span className="text-sm text-gray-600 truncate max-w-[150px]">{item.product_name}</span>
+                      <span className="text-xs text-apple-gray truncate max-w-[120px]">{item.product_name}</span>
                     </div>
                   ))}
                   {order.items?.length > 3 && (
-                    <span className="text-sm text-gray-400">+{order.items.length - 3} more</span>
+                    <span className="text-[11px] text-apple-gray">+{order.items.length - 3} more</span>
                   )}
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{order.items?.length || 0} item(s)</span>
-                  <span className="text-lg font-bold text-blue-600">${parseFloat(order.total_amount).toFixed(2)}</span>
+                  <span className="text-xs text-apple-gray">{order.items?.length || 0} item(s)</span>
+                  <span className="text-sm font-semibold text-apple-dark">${parseFloat(order.total_amount).toFixed(2)}</span>
                 </div>
               </Link>
             ))}

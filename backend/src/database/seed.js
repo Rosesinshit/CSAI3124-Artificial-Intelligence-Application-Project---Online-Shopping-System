@@ -298,13 +298,13 @@ async function seed() {
     const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     const { rows: [promo1] } = await client.query(
-      `INSERT INTO promotion (name, description, type, discount_value, start_date, end_date, is_active)
+      `INSERT INTO promotion (name, description, type, value, start_date, end_date, is_active)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING promotion_id`,
       ['Summer Tech Sale', 'Up to 20% off on electronics!', 'percentage', 20, now.toISOString(), in30Days.toISOString(), true]
     );
 
     const { rows: [promo2] } = await client.query(
-      `INSERT INTO promotion (name, description, type, discount_value, start_date, end_date, is_active)
+      `INSERT INTO promotion (name, description, type, value, start_date, end_date, is_active)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING promotion_id`,
       ['Flash Deal', '$15 off selected items', 'fixed', 15, now.toISOString(), in7Days.toISOString(), true]
     );

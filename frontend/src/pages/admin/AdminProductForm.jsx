@@ -103,46 +103,49 @@ export default function AdminProductForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link to="/admin/products" className="text-blue-600 hover:underline text-sm mb-4 inline-block">← Back to Products</Link>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">{isEdit ? 'Edit Product' : 'New Product'}</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <Link to="/admin/products" className="text-apple-blue text-xs hover:underline mb-4 inline-flex items-center gap-1">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        Back to Products
+      </Link>
+      <h1 className="section-heading">{isEdit ? 'Edit Product' : 'New Product'}</h1>
 
-      {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
+      {error && <div className="bg-apple-red/5 border border-apple-red/10 text-apple-red p-3 rounded-2xl mb-5 text-xs">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Basic Info */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-apple-dark tracking-tight mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Product Name *</label>
               <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">SKU *</label>
               <input type="text" required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Price *</label>
               <input type="number" step="0.01" min="0" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sale Price</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Sale Price</label>
               <input type="number" step="0.01" min="0" value={form.sale_price} onChange={(e) => setForm({ ...form, sale_price: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Stock Quantity</label>
               <input type="number" min="0" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Category</label>
               <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                className="glass-input !w-auto w-full">
                 <option value="">No Category</option>
                 {categories.map(c => <option key={c.category_id} value={c.category_id}>{c.name}</option>)}
               </select>
@@ -150,40 +153,40 @@ export default function AdminProductForm() {
           </div>
 
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+            <label className="block text-[11px] font-medium text-apple-gray mb-1">Short Description</label>
             <textarea value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })}
-              rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              rows={2} className="glass-input !rounded-xl" />
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Description (HTML supported)</label>
+            <label className="block text-[11px] font-medium text-apple-gray mb-1">Full Description (HTML supported)</label>
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={5} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              rows={5} className="glass-input !rounded-xl" />
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+            <label className="block text-[11px] font-medium text-apple-gray mb-1">Tags (comma separated)</label>
             <input type="text" value={tags} onChange={(e) => setTags(e.target.value)}
               placeholder="gaming, laptop, premium"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              className="glass-input" />
           </div>
         </div>
 
         {/* Product Images (B1) */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">Product Images</h2>
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-apple-dark tracking-tight mb-4">Product Images</h2>
 
           {/* Existing Images */}
           {existingImages.length > 0 && (
-            <div className="flex flex-wrap gap-4 mb-4">
+            <div className="flex flex-wrap gap-3 mb-4">
               {existingImages.map((img) => (
-                <div key={img.image_id} className="relative">
-                  <img src={img.image_url} alt={img.alt_text} className="w-24 h-24 rounded-lg object-cover"
+                <div key={img.image_id} className="relative group">
+                  <img src={img.image_url} alt={img.alt_text} className="w-20 h-20 rounded-xl object-cover"
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/96x96?text=Img'; }} />
                   <button type="button" onClick={() => deleteImage(img.image_id)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs hover:bg-red-600">
-                    ×
+                    className="absolute -top-1.5 -right-1.5 bg-apple-red text-white w-5 h-5 rounded-full text-[10px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                   {img.is_primary && (
-                    <span className="absolute bottom-0 left-0 right-0 bg-blue-600 text-white text-xs text-center py-0.5 rounded-b-lg">Primary</span>
+                    <span className="absolute bottom-0 left-0 right-0 bg-apple-blue text-white text-[9px] text-center py-0.5 rounded-b-xl">Primary</span>
                   )}
                 </div>
               ))}
@@ -192,35 +195,38 @@ export default function AdminProductForm() {
 
           <input type="file" multiple accept="image/*"
             onChange={(e) => setImages(Array.from(e.target.files))}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-          <p className="text-xs text-gray-400 mt-1">Upload up to 10 images (JPEG, PNG, GIF, WebP). Max 5MB each.</p>
+            className="block w-full text-xs text-apple-gray file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:bg-apple-blue/10 file:text-apple-blue file:text-xs file:font-medium hover:file:bg-apple-blue/15 transition-colors" />
+          <p className="text-[10px] text-apple-gray mt-1.5">Upload up to 10 images (JPEG, PNG, GIF, WebP). Max 5MB each.</p>
         </div>
 
         {/* Product Attributes (C1, C5) */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Product Attributes</h2>
-            <button type="button" onClick={addAttribute} className="text-blue-600 hover:underline text-sm">+ Add Attribute</button>
+            <h2 className="text-sm font-semibold text-apple-dark tracking-tight">Product Attributes</h2>
+            <button type="button" onClick={addAttribute} className="text-apple-blue text-xs hover:underline">+ Add Attribute</button>
           </div>
 
           {attributes.length === 0 ? (
-            <p className="text-gray-400 text-sm">No attributes. Click "Add Attribute" to add specifications.</p>
+            <p className="text-apple-gray text-xs">No attributes. Click "Add Attribute" to add specifications.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {attributes.map((attr, idx) => (
-                <div key={idx} className="flex items-start gap-3">
+                <div key={idx} className="flex items-start gap-2.5">
                   <input type="text" placeholder="Name (e.g. Brand)" value={attr.name}
                     onChange={(e) => updateAttribute(idx, 'name', e.target.value)}
-                    className="w-1/4 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                    className="glass-input !w-auto w-1/4 text-xs" />
                   <textarea placeholder="Value" value={attr.value}
                     onChange={(e) => updateAttribute(idx, 'value', e.target.value)}
-                    rows={1} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                  <label className="flex items-center gap-1 text-xs text-gray-500">
+                    rows={1} className="glass-input !rounded-xl flex-1 text-xs" />
+                  <label className="flex items-center gap-1 text-[10px] text-apple-gray whitespace-nowrap pt-2">
                     <input type="checkbox" checked={attr.is_html}
-                      onChange={(e) => updateAttribute(idx, 'is_html', e.target.checked)} />
+                      onChange={(e) => updateAttribute(idx, 'is_html', e.target.checked)}
+                      className="rounded text-apple-blue w-3 h-3" />
                     HTML
                   </label>
-                  <button type="button" onClick={() => removeAttribute(idx)} className="text-red-500 hover:text-red-700 text-sm">✕</button>
+                  <button type="button" onClick={() => removeAttribute(idx)} className="text-apple-red hover:text-apple-red/80 pt-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
                 </div>
               ))}
             </div>
@@ -228,34 +234,33 @@ export default function AdminProductForm() {
         </div>
 
         {/* SEO */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">SEO</h2>
-          <div className="space-y-4">
+        <div className="glass rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-apple-dark tracking-tight mb-4">SEO</h2>
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Meta Title</label>
               <input type="text" value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Meta Description</label>
               <textarea value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
-                rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                rows={2} className="glass-input !rounded-xl" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
+              <label className="block text-[11px] font-medium text-apple-gray mb-1">Meta Keywords</label>
               <input type="text" value={form.meta_keywords} onChange={(e) => setForm({ ...form, meta_keywords: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                className="glass-input" />
             </div>
           </div>
         </div>
 
         {/* Submit */}
-        <div className="flex gap-4">
-          <button type="submit" disabled={loading}
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50">
+        <div className="flex gap-3">
+          <button type="submit" disabled={loading} className="btn-apple btn-apple-primary">
             {loading ? 'Saving...' : (isEdit ? 'Update Product' : 'Create Product')}
           </button>
-          <Link to="/admin/products" className="px-8 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 font-medium">
+          <Link to="/admin/products" className="btn-apple btn-apple-secondary">
             Cancel
           </Link>
         </div>

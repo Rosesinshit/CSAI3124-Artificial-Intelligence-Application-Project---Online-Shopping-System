@@ -15,9 +15,9 @@ export default function CheckoutPage() {
 
   if (cart.items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500 text-lg mb-4">Your cart is empty</p>
-        <Link to="/products" className="text-blue-600 hover:underline">Continue Shopping</Link>
+      <div className="max-w-[980px] mx-auto px-4 py-20 text-center">
+        <p className="text-apple-gray text-sm mb-5">Your bag is empty.</p>
+        <Link to="/products" className="btn-apple btn-apple-primary text-sm">Continue Shopping</Link>
       </div>
     );
   }
@@ -42,36 +42,39 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Checkout</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading">Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Shipping Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
+          <form onSubmit={handleSubmit} className="glass rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-apple-dark tracking-tight mb-5">Shipping Information</h2>
 
-            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
+            {error && (
+              <div className="bg-apple-red/5 border border-apple-red/10 text-apple-red p-3 rounded-xl mb-4 text-sm">
+                {error}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Address *</label>
+                <label className="block text-xs font-medium text-apple-gray mb-1.5">Shipping Address *</label>
                 <textarea
                   required
                   value={shippingAddress}
                   onChange={(e) => setShippingAddress(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="glass-input"
                   placeholder="Enter your shipping address"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Order Notes (optional)</label>
+                <label className="block text-xs font-medium text-apple-gray mb-1.5">Order Notes (optional)</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="glass-input"
                   placeholder="Special instructions..."
                 />
               </div>
@@ -80,30 +83,29 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+              className="w-full mt-6 btn-apple btn-apple-primary"
             >
-              {loading ? 'Placing Order...' : `Place Order ($${cart.total_amount})`}
+              {loading ? 'Placing Order...' : `Place Order — $${cart.total_amount}`}
             </button>
           </form>
         </div>
 
-        {/* Order Summary */}
-        <div className="bg-white rounded-lg shadow-md p-6 h-fit">
-          <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-          <ul className="divide-y">
+        <div className="glass rounded-2xl p-6 h-fit">
+          <h2 className="text-lg font-semibold text-apple-dark tracking-tight mb-4">Order Summary</h2>
+          <ul className="divide-y divide-black/[0.04]">
             {cart.items.map((item) => (
               <li key={item.cart_item_id} className="py-3 flex justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">{item.name}</p>
-                  <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                  <p className="text-sm font-medium text-apple-dark">{item.name}</p>
+                  <p className="text-xs text-apple-gray mt-0.5">Qty: {item.quantity}</p>
                 </div>
-                <span className="text-sm font-semibold">${parseFloat(item.line_total).toFixed(2)}</span>
+                <span className="text-sm font-medium text-apple-dark">${parseFloat(item.line_total).toFixed(2)}</span>
               </li>
             ))}
           </ul>
-          <div className="border-t mt-4 pt-4 flex justify-between">
-            <span className="font-semibold">Total</span>
-            <span className="text-xl font-bold text-blue-600">${cart.total_amount}</span>
+          <div className="border-t border-black/[0.06] mt-4 pt-4 flex justify-between items-center">
+            <span className="text-sm font-medium text-apple-dark">Total</span>
+            <span className="text-xl font-semibold text-apple-dark tracking-tight">${cart.total_amount}</span>
           </div>
         </div>
       </div>

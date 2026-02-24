@@ -10,20 +10,25 @@ export default function Pagination({ meta, onPageChange }) {
     pages.push(i);
   }
 
+  const btnBase = 'w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200';
+  const btnActive = 'bg-apple-dark text-white';
+  const btnDefault = 'text-apple-dark/70 hover:bg-black/[0.04]';
+  const btnDisabled = 'text-apple-gray-3 cursor-not-allowed';
+
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <div className="flex items-center justify-center gap-1 mt-10">
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+        className={`${btnBase} ${page <= 1 ? btnDisabled : btnDefault}`}
       >
-        ← Prev
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
       </button>
 
       {startPage > 1 && (
         <>
-          <button onClick={() => onPageChange(1)} className="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">1</button>
-          {startPage > 2 && <span className="text-gray-400">...</span>}
+          <button onClick={() => onPageChange(1)} className={`${btnBase} ${btnDefault}`}>1</button>
+          {startPage > 2 && <span className="text-apple-gray px-1">...</span>}
         </>
       )}
 
@@ -31,7 +36,7 @@ export default function Pagination({ meta, onPageChange }) {
         <button
           key={p}
           onClick={() => onPageChange(p)}
-          className={`px-3 py-1 rounded border text-sm ${p === page ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-100'}`}
+          className={`${btnBase} ${p === page ? btnActive : btnDefault}`}
         >
           {p}
         </button>
@@ -39,17 +44,17 @@ export default function Pagination({ meta, onPageChange }) {
 
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="text-gray-400">...</span>}
-          <button onClick={() => onPageChange(totalPages)} className="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100">{totalPages}</button>
+          {endPage < totalPages - 1 && <span className="text-apple-gray px-1">...</span>}
+          <button onClick={() => onPageChange(totalPages)} className={`${btnBase} ${btnDefault}`}>{totalPages}</button>
         </>
       )}
 
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+        className={`${btnBase} ${page >= totalPages ? btnDisabled : btnDefault}`}
       >
-        Next →
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>
   );

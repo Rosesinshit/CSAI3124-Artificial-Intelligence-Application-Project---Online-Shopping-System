@@ -233,7 +233,6 @@ CREATE INDEX idx_wishlist_item_product ON wishlist_item(product_id);
 CREATE TABLE promotion (
     promotion_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT,
     type VARCHAR(50) NOT NULL CHECK (type IN ('percentage', 'fixed', 'special_price')),
     discount_value DECIMAL(12, 2) NOT NULL,
     min_purchase DECIMAL(12, 2) DEFAULT 0,

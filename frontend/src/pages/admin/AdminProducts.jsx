@@ -48,13 +48,10 @@ export default function AdminProducts() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-[980px] mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-        <Link
-          to="/admin/products/new"
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700"
-        >
+        <h1 className="section-heading !mb-0">Products</h1>
+        <Link to="/admin/products/new" className="btn-apple btn-apple-primary text-xs">
           + New Product
         </Link>
       </div>
@@ -68,78 +65,83 @@ export default function AdminProducts() {
           name="q"
           defaultValue={q}
           placeholder="Search by name or SKU..."
-          className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="glass-input !w-auto min-w-[280px]"
         />
       </form>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading...</div>
+        <div className="flex items-center justify-center py-16">
+          <div className="shimmer w-6 h-6 rounded-full" />
+        </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr className="text-left text-gray-500">
-                  <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">SKU</th>
-                  <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Stock</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.product_id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <img
-                        src={product.primary_image || 'https://via.placeholder.com/40x40?text=No'}
-                        alt=""
-                        className="w-10 h-10 rounded object-cover"
-                        onError={(e) => { e.target.src = 'https://via.placeholder.com/40x40?text=No'; }}
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-medium">
-                      <Link to={`/admin/products/${product.product_id}/edit`} className="text-blue-600 hover:underline">
-                        {product.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">{product.sku}</td>
-                    <td className="px-4 py-3">
-                      ${parseFloat(product.price).toFixed(2)}
-                      {product.sale_price && (
-                        <span className="text-red-500 ml-1 text-xs">(Sale: ${parseFloat(product.sale_price).toFixed(2)})</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={product.stock_quantity <= 0 ? 'text-red-600' : product.stock_quantity < 10 ? 'text-yellow-600' : 'text-green-600'}>
-                        {product.stock_quantity}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => toggleStatus(product.product_id, product.is_active)}
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {product.is_active ? 'Active' : 'Inactive'}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Link to={`/admin/products/${product.product_id}/edit`} className="text-blue-600 hover:underline text-xs">Edit</Link>
-                        <button onClick={() => deleteProduct(product.product_id)} className="text-red-600 hover:underline text-xs">Delete</button>
-                      </div>
-                    </td>
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-apple-gray-4/50 text-left text-apple-gray">
+                    <th className="px-4 py-3 font-medium">Image</th>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">SKU</th>
+                    <th className="px-4 py-3 font-medium">Price</th>
+                    <th className="px-4 py-3 font-medium">Stock</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
-                ))}
-                {products.length === 0 && (
-                  <tr><td colSpan={7} className="text-center py-8 text-gray-500">No products found</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product.product_id} className="border-b border-apple-gray-4/30 last:border-b-0 hover:bg-white/40 transition-colors">
+                      <td className="px-4 py-2.5">
+                        <img
+                          src={product.primary_image || 'https://via.placeholder.com/40x40?text=No'}
+                          alt=""
+                          className="w-9 h-9 rounded-lg object-cover"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/40x40?text=No'; }}
+                        />
+                      </td>
+                      <td className="px-4 py-2.5 font-medium text-apple-dark">
+                        <Link to={`/admin/products/${product.product_id}/edit`} className="text-apple-blue hover:underline">
+                          {product.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2.5 text-apple-gray">{product.sku}</td>
+                      <td className="px-4 py-2.5 text-apple-dark">
+                        ${parseFloat(product.price).toFixed(2)}
+                        {product.sale_price && (
+                          <span className="text-apple-red ml-1 text-[10px]">(${parseFloat(product.sale_price).toFixed(2)})</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`inline-flex items-center gap-1 ${product.stock_quantity <= 0 ? 'text-apple-red' : product.stock_quantity < 10 ? 'text-apple-orange' : 'text-apple-green'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${product.stock_quantity <= 0 ? 'bg-apple-red' : product.stock_quantity < 10 ? 'bg-apple-orange' : 'bg-apple-green'}`} />
+                          {product.stock_quantity}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <button
+                          onClick={() => toggleStatus(product.product_id, product.is_active)}
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+                            product.is_active ? 'bg-apple-green/10 text-apple-green' : 'bg-apple-red/10 text-apple-red'
+                          }`}
+                        >
+                          {product.is_active ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex gap-3">
+                          <Link to={`/admin/products/${product.product_id}/edit`} className="text-apple-blue hover:underline">Edit</Link>
+                          <button onClick={() => deleteProduct(product.product_id)} className="text-apple-red hover:underline">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {products.length === 0 && (
+                    <tr><td colSpan={7} className="text-center py-12 text-apple-gray">No products found</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
           <Pagination meta={meta} onPageChange={(p) => setSearchParams({ ...Object.fromEntries(searchParams), page: p.toString() })} />
         </>

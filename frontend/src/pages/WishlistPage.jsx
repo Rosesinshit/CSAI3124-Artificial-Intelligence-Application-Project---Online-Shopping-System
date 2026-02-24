@@ -59,44 +59,46 @@ export default function WishlistPage() {
   const FALLBACK = 'https://via.placeholder.com/100x100?text=No+Image';
 
   if (loading) {
-    return <div className="text-center py-16 text-gray-500">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="shimmer w-6 h-6 rounded-full" />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">My Wish List</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading">Wish List</h1>
 
-      {/* Notifications Banner */}
+      {/* Notifications */}
       {notifications.total_notifications > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-green-600 text-xl">🔔</span>
-            <h3 className="font-semibold text-green-800">
-              Price Drop Notifications ({notifications.total_notifications})
+        <div className="glass rounded-2xl p-5 mb-6 border border-apple-green/20">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-4 h-4 text-apple-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <h3 className="text-xs font-semibold text-apple-green">
+              {notifications.total_notifications} Price Notification(s)
             </h3>
           </div>
           {notifications.price_drops.length > 0 && (
             <div className="mb-2">
-              <p className="text-sm text-green-700 font-medium mb-1">Wishlist items with price drops:</p>
               {notifications.price_drops.map(item => (
-                <div key={item.wishlist_item_id} className="flex items-center gap-2 text-sm text-green-700">
-                  <span>•</span>
-                  <Link to={`/product/${item.product_id}`} className="hover:underline font-medium">{item.name}</Link>
-                  <span>was ${parseFloat(item.price_when_added).toFixed(2)},</span>
-                  <span className="font-semibold">now ${parseFloat(item.current_price).toFixed(2)}</span>
+                <div key={item.wishlist_item_id} className="flex items-center gap-1.5 text-xs text-apple-dark/70 py-0.5">
+                  <span className="w-1 h-1 rounded-full bg-apple-green" />
+                  <Link to={`/product/${item.product_id}`} className="hover:text-apple-blue font-medium">{item.name}</Link>
+                  <span className="text-apple-gray">was ${parseFloat(item.price_when_added).toFixed(2)},</span>
+                  <span className="font-medium text-apple-green">now ${parseFloat(item.current_price).toFixed(2)}</span>
                 </div>
               ))}
             </div>
           )}
           {notifications.alerts_reached.length > 0 && (
             <div>
-              <p className="text-sm text-green-700 font-medium mb-1">Price alerts reached:</p>
               {notifications.alerts_reached.map(alert => (
-                <div key={alert.alert_id} className="flex items-center gap-2 text-sm text-green-700">
-                  <span>•</span>
-                  <Link to={`/product/${alert.product_id}`} className="hover:underline font-medium">{alert.name}</Link>
-                  <span>target: ${parseFloat(alert.target_price).toFixed(2)},</span>
-                  <span className="font-semibold">now ${parseFloat(alert.current_price).toFixed(2)}</span>
+                <div key={alert.alert_id} className="flex items-center gap-1.5 text-xs text-apple-dark/70 py-0.5">
+                  <span className="w-1 h-1 rounded-full bg-apple-green" />
+                  <Link to={`/product/${alert.product_id}`} className="hover:text-apple-blue font-medium">{alert.name}</Link>
+                  <span className="text-apple-gray">target ${parseFloat(alert.target_price).toFixed(2)},</span>
+                  <span className="font-medium text-apple-green">now ${parseFloat(alert.current_price).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -105,23 +107,19 @@ export default function WishlistPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b mb-6">
+      <div className="flex gap-1 mb-8">
         <button
           onClick={() => setActiveTab('wishlist')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'wishlist'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+            activeTab === 'wishlist' ? 'bg-apple-dark text-white' : 'text-apple-gray hover:bg-black/[0.04]'
           }`}
         >
           Wish List ({wishlist.item_count || 0})
         </button>
         <button
           onClick={() => setActiveTab('alerts')}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-            activeTab === 'alerts'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+            activeTab === 'alerts' ? 'bg-apple-dark text-white' : 'text-apple-gray hover:bg-black/[0.04]'
           }`}
         >
           Price Alerts ({priceAlerts.length})
@@ -132,66 +130,63 @@ export default function WishlistPage() {
       {activeTab === 'wishlist' && (
         <div>
           {(!wishlist.items || wishlist.items.length === 0) ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg mb-4">Your wish list is empty</p>
-              <Link to="/products" className="text-blue-600 hover:text-blue-800 font-medium">
-                Browse Products →
+            <div className="text-center py-20">
+              <p className="text-apple-gray text-sm mb-5">Your wish list is empty.</p>
+              <Link to="/products" className="text-apple-blue text-sm hover:underline inline-flex items-center gap-1">
+                Browse Products
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {wishlist.items.map((item) => (
-                <div key={item.wishlist_item_id} className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4">
+                <div key={item.wishlist_item_id} className="glass-card !rounded-2xl !p-4 flex items-center gap-4">
                   <Link to={`/product/${item.product_id}`} className="flex-shrink-0">
                     <img
                       src={item.image_url || FALLBACK}
                       alt={item.name}
-                      className="w-24 h-24 object-cover rounded-lg"
+                      className="w-20 h-20 object-cover rounded-xl bg-apple-gray-5"
                       onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK; }}
                     />
                   </Link>
                   <div className="flex-1 min-w-0">
-                    <Link to={`/product/${item.product_id}`} className="font-semibold text-gray-800 hover:text-blue-600 line-clamp-1">
+                    <Link to={`/product/${item.product_id}`} className="text-sm font-medium text-apple-dark hover:text-apple-blue transition-colors line-clamp-1">
                       {item.name}
                     </Link>
                     {item.short_description && (
-                      <p className="text-sm text-gray-500 line-clamp-1 mt-1">{item.short_description}</p>
+                      <p className="text-xs text-apple-gray line-clamp-1 mt-0.5">{item.short_description}</p>
                     )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-lg font-bold text-blue-600">
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-sm font-semibold text-apple-dark">
                         ${parseFloat(item.current_price).toFixed(2)}
                       </span>
                       {item.price_dropped && (
                         <>
-                          <span className="text-sm text-gray-400 line-through">
+                          <span className="text-xs text-apple-gray line-through">
                             ${parseFloat(item.price_when_added).toFixed(2)}
                           </span>
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">
-                            Price Dropped!
+                          <span className="bg-apple-green/10 text-apple-green text-[10px] px-2 py-0.5 rounded-full font-medium">
+                            Price Dropped
                           </span>
                         </>
                       )}
                     </div>
                     {!item.is_active && (
-                      <span className="text-red-500 text-sm">Product unavailable</span>
+                      <span className="text-apple-red text-xs mt-1">Unavailable</span>
                     )}
                   </div>
                   <div className="flex flex-col gap-2 flex-shrink-0">
                     {item.is_active && item.stock_quantity > 0 && (
                       <button
                         onClick={() => handleAddToCart(item.product_id)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          addedToCart[item.product_id]
-                            ? 'bg-green-600 text-white'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                        className={`btn-apple text-xs transition-all ${addedToCart[item.product_id] ? 'bg-apple-green text-white' : 'btn-apple-primary'}`}
                       >
-                        {addedToCart[item.product_id] ? '✓ Added' : '🛒 Add to Cart'}
+                        {addedToCart[item.product_id] ? 'Added' : 'Add to Bag'}
                       </button>
                     )}
                     <button
                       onClick={() => handleRemoveFromWishlist(item.wishlist_item_id)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50"
+                      className="btn-apple text-xs text-apple-red border border-apple-red/20 hover:bg-apple-red/5"
                     >
                       Remove
                     </button>
@@ -207,50 +202,46 @@ export default function WishlistPage() {
       {activeTab === 'alerts' && (
         <div>
           {priceAlerts.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg mb-4">No price alerts set</p>
-              <p className="text-sm text-gray-400">
-                Set a target price on any product to be notified when it drops to your desired price.
-              </p>
+            <div className="text-center py-20">
+              <p className="text-apple-gray text-sm mb-2">No price alerts set.</p>
+              <p className="text-xs text-apple-gray-2">Set a target price on any product to get notified.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {priceAlerts.map((alert) => (
-                <div key={alert.alert_id} className="bg-white rounded-lg shadow-md p-4 flex items-center gap-4">
+                <div key={alert.alert_id} className="glass-card !rounded-2xl !p-4 flex items-center gap-4">
                   <Link to={`/product/${alert.product_id}`} className="flex-shrink-0">
                     <img
                       src={alert.image_url || FALLBACK}
                       alt={alert.name}
-                      className="w-20 h-20 object-cover rounded-lg"
+                      className="w-16 h-16 object-cover rounded-xl bg-apple-gray-5"
                       onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK; }}
                     />
                   </Link>
                   <div className="flex-1 min-w-0">
-                    <Link to={`/product/${alert.product_id}`} className="font-semibold text-gray-800 hover:text-blue-600">
+                    <Link to={`/product/${alert.product_id}`} className="text-sm font-medium text-apple-dark hover:text-apple-blue transition-colors">
                       {alert.name}
                     </Link>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-sm text-gray-500">
-                        Current: <span className="font-medium text-gray-700">${parseFloat(alert.current_price).toFixed(2)}</span>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs">
+                      <span className="text-apple-gray">
+                        Current: <span className="font-medium text-apple-dark">${parseFloat(alert.current_price).toFixed(2)}</span>
                       </span>
-                      <span className="text-sm text-gray-500">
-                        Target: <span className="font-medium text-blue-600">${parseFloat(alert.target_price).toFixed(2)}</span>
+                      <span className="text-apple-gray">
+                        Target: <span className="font-medium text-apple-blue">${parseFloat(alert.target_price).toFixed(2)}</span>
                       </span>
                     </div>
                     {alert.target_reached && (
-                      <span className="inline-block mt-1 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">
-                        🎉 Target price reached!
+                      <span className="inline-block mt-1 bg-apple-green/10 text-apple-green text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        Target reached!
                       </span>
                     )}
                   </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      onClick={() => handleRemovePriceAlert(alert.alert_id)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50"
-                    >
-                      Remove
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleRemovePriceAlert(alert.alert_id)}
+                    className="btn-apple text-xs text-apple-red border border-apple-red/20 hover:bg-apple-red/5 flex-shrink-0"
+                  >
+                    Remove
+                  </button>
                 </div>
               ))}
             </div>

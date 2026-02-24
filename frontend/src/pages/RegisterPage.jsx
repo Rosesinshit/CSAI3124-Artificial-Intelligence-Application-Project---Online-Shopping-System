@@ -33,64 +33,68 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-md w-full max-w-md p-8">
-        <h1 className="text-2xl font-bold text-center mb-6">Create Account</h1>
+    <div className="min-h-[70vh] flex items-center justify-center px-4 py-10">
+      <div className="glass rounded-2xl w-full max-w-md p-8">
+        <h1 className="text-2xl font-semibold text-apple-dark text-center tracking-tight mb-1">Create your account</h1>
+        <p className="text-sm text-apple-gray text-center mb-7">Join ShopOnline today</p>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
+        {error && (
+          <div className="bg-apple-red/5 border border-apple-red/10 text-apple-red p-3 rounded-xl mb-4 text-sm">{error}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label className="block text-xs font-medium text-apple-gray mb-1.5">Full Name</label>
             <input
               type="text"
               required
               value={form.full_name}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="glass-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-xs font-medium text-apple-gray mb-1.5">Email</label>
             <input
               type="email"
               required
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="glass-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-xs font-medium text-apple-gray mb-1.5">Password</label>
             <input
               type="password"
               required
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="glass-input"
               placeholder="At least 6 characters"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone (optional)</label>
+            <label className="block text-xs font-medium text-apple-gray mb-1.5">Phone (optional)</label>
             <input
               type="text"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="glass-input"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+            className="w-full btn-apple btn-apple-primary mt-2"
           >
-            {loading ? 'Creating account...' : 'Register'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        <p className="text-center text-gray-500 mt-4 text-sm">
-          Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Sign In</Link>
+        <p className="text-center text-apple-gray mt-5 text-xs">
+          Already have an account?{' '}
+          <Link to="/login" className="text-apple-blue hover:underline">Sign in</Link>
         </p>
       </div>
     </div>

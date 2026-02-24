@@ -73,35 +73,33 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">
-        {q ? `Search Results for "${q}"` : 'Advanced Search'}
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading !text-left">
+        {q ? `Results for "${q}"` : 'Search'}
       </h1>
-      {meta && <p className="text-sm text-gray-500 mb-6">{meta.total} product(s) found</p>}
+      {meta && <p className="text-xs text-apple-gray mb-8 -mt-2">{meta.total} product(s) found</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Filters Sidebar (C3) */}
-        <aside className="space-y-6">
-          {/* Search Box */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h3 className="font-semibold mb-2">Search</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Filters */}
+        <aside className="space-y-4">
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-xs font-semibold text-apple-dark mb-2">Search</h3>
             <form onSubmit={(e) => { e.preventDefault(); updateParam('q', e.target.q.value); }}>
               <input
                 name="q"
                 defaultValue={q}
-                placeholder="Search keywords..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                placeholder="Keywords..."
+                className="glass-input text-sm"
               />
             </form>
           </div>
 
-          {/* Category Filter */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h3 className="font-semibold mb-2">Category</h3>
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-xs font-semibold text-apple-dark mb-2">Category</h3>
             <select
               value={category}
               onChange={(e) => updateParam('category', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="glass-input text-sm"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -110,9 +108,8 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Price Range Filter */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h3 className="font-semibold mb-2">Price Range</h3>
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-xs font-semibold text-apple-dark mb-2">Price Range</h3>
             <div className="flex gap-2 mb-2">
               <input
                 type="number"
@@ -120,41 +117,40 @@ export default function SearchPage() {
                 placeholder="Min"
                 value={localMinPrice}
                 onChange={(e) => setLocalMinPrice(e.target.value)}
-                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                className="glass-input text-sm !py-1.5"
               />
-              <span className="text-gray-400">-</span>
+              <span className="text-apple-gray text-xs self-center">–</span>
               <input
                 type="number"
                 min="0"
                 placeholder="Max"
                 value={localMaxPrice}
                 onChange={(e) => setLocalMaxPrice(e.target.value)}
-                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                className="glass-input text-sm !py-1.5"
               />
             </div>
             <button
               onClick={applyPriceFilter}
-              className="w-full bg-blue-600 text-white py-1 rounded text-sm hover:bg-blue-700"
+              className="w-full btn-apple btn-apple-primary text-xs !py-1.5"
             >
               Apply
             </button>
           </div>
 
-          {/* Tag Filter */}
           {tags.length > 0 && (
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h3 className="font-semibold mb-2">Tags</h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="glass rounded-2xl p-4">
+              <h3 className="text-xs font-semibold text-apple-dark mb-2">Tags</h3>
+              <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag) => {
                   const isSelected = selectedTags.split(',').includes(tag.slug);
                   return (
                     <button
                       key={tag.tag_id}
                       onClick={() => toggleTag(tag.slug)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
                         isSelected
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-apple-dark text-white'
+                          : 'text-apple-gray hover:bg-black/[0.04]'
                       }`}
                     >
                       #{tag.name} ({tag.product_count})
@@ -165,13 +161,12 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Sort */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h3 className="font-semibold mb-2">Sort By</h3>
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-xs font-semibold text-apple-dark mb-2">Sort By</h3>
             <select
               value={sort}
               onChange={(e) => updateParam('sort', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              className="glass-input text-sm"
             >
               <option value="newest">Newest</option>
               <option value="price_asc">Price: Low to High</option>
@@ -184,15 +179,17 @@ export default function SearchPage() {
         {/* Results */}
         <div className="lg:col-span-3">
           {loading ? (
-            <div className="text-center py-16 text-gray-500">Searching...</div>
+            <div className="flex items-center justify-center py-20">
+              <div className="shimmer w-6 h-6 rounded-full" />
+            </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg">No products match your search criteria.</p>
-              <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+            <div className="text-center py-20">
+              <p className="text-apple-gray text-sm">No products match your criteria.</p>
+              <p className="text-xs text-apple-gray-2 mt-1">Try adjusting your filters.</p>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {products.map((p) => <ProductCard key={p.product_id} product={p} />)}
               </div>
               <Pagination meta={meta} onPageChange={(p) => updateParam('page', p)} />

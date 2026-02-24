@@ -5,95 +5,85 @@ export default function CartPage() {
   const { cart, updateQuantity, removeItem, clearCart, loading } = useCart();
   const navigate = useNavigate();
 
-  if (loading) return <div className="text-center py-16 text-gray-500">Loading cart...</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="shimmer w-6 h-6 rounded-full" />
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading">Bag</h1>
 
       {cart.items.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500 text-lg mb-4">Your cart is empty</p>
-          <Link to="/products" className="text-blue-600 font-medium hover:underline">Continue Shopping</Link>
+        <div className="text-center py-20">
+          <p className="text-apple-gray text-sm mb-5">Your bag is empty.</p>
+          <Link to="/products" className="btn-apple btn-apple-primary text-sm">Continue Shopping</Link>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="glass rounded-2xl overflow-hidden divide-y divide-black/[0.04]">
             {cart.items.map((item) => (
-              <div key={item.cart_item_id} className="flex items-center p-4 border-b last:border-b-0 hover:bg-gray-50">
-                {/* Image */}
+              <div key={item.cart_item_id} className="flex items-center p-5 gap-5">
                 <img
                   src={item.image_url || 'https://via.placeholder.com/80x80?text=No+Img'}
                   alt={item.name}
-                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                  className="w-[72px] h-[72px] rounded-xl object-cover bg-apple-gray-5 flex-shrink-0"
                   onError={(e) => { e.target.src = 'https://via.placeholder.com/80x80?text=No+Img'; }}
                 />
-
-                {/* Info */}
-                <div className="flex-1 ml-4">
-                  <Link to={`/product/${item.product_id}`} className="font-medium text-gray-800 hover:text-blue-600">
+                <div className="flex-1 min-w-0">
+                  <Link to={`/product/${item.product_id}`} className="text-sm font-medium text-apple-dark hover:text-apple-blue transition-colors line-clamp-1">
                     {item.name}
                   </Link>
-                  <p className="text-blue-600 font-semibold">
+                  <p className="text-sm text-apple-blue font-medium mt-0.5">
                     ${parseFloat(item.sale_price || item.price).toFixed(2)}
                   </p>
                 </div>
-
-                {/* Quantity */}
-                <div className="flex items-center border border-gray-300 rounded-lg mx-4">
+                <div className="flex items-center glass-light rounded-full">
                   <button
                     onClick={() => updateQuantity(item.cart_item_id, Math.max(1, item.quantity - 1))}
-                    className="px-2 py-1 hover:bg-gray-100 text-sm"
-                  >
-                    −
-                  </button>
-                  <span className="px-3 py-1 font-medium text-sm">{item.quantity}</span>
+                    className="w-8 h-8 flex items-center justify-center text-apple-gray hover:text-apple-dark transition-colors text-sm"
+                  >−</button>
+                  <span className="w-8 text-center text-sm font-medium text-apple-dark">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
-                    className="px-2 py-1 hover:bg-gray-100 text-sm"
-                  >
-                    +
-                  </button>
+                    className="w-8 h-8 flex items-center justify-center text-apple-gray hover:text-apple-dark transition-colors text-sm"
+                  >+</button>
                 </div>
-
-                {/* Line Total */}
-                <span className="w-24 text-right font-semibold text-gray-800">
+                <span className="w-20 text-right text-sm font-semibold text-apple-dark">
                   ${parseFloat(item.line_total).toFixed(2)}
                 </span>
-
-                {/* Remove */}
                 <button
                   onClick={() => removeItem(item.cart_item_id)}
-                  className="ml-4 text-red-500 hover:text-red-700"
+                  className="text-apple-gray hover:text-apple-red transition-colors ml-1"
                   title="Remove"
                 >
-                  🗑️
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
             ))}
           </div>
 
-          {/* Summary */}
-          <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-600">Items ({cart.item_count})</span>
-              <span className="text-xl font-bold text-gray-800">${cart.total_amount}</span>
+          <div className="mt-6 glass rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-sm text-apple-gray">Subtotal ({cart.item_count} items)</span>
+              <span className="text-xl font-semibold text-apple-dark tracking-tight">${cart.total_amount}</span>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={clearCart}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm"
+                className="btn-apple btn-apple-secondary text-xs"
               >
-                Clear Cart
+                Clear Bag
               </button>
-              <Link to="/products" className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-sm text-center">
+              <Link to="/products" className="btn-apple btn-apple-secondary text-xs text-center">
                 Continue Shopping
               </Link>
               <button
                 onClick={() => navigate('/checkout')}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
+                className="flex-1 btn-apple btn-apple-primary text-sm"
               >
-                Proceed to Checkout
+                Check Out
               </button>
             </div>
           </div>

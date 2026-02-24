@@ -37,8 +37,8 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Order Management</h1>
+    <div className="max-w-[980px] mx-auto px-4 py-10">
+      <h1 className="section-heading">Order Management</h1>
 
       {/* Status Filters */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -46,8 +46,10 @@ export default function AdminOrders() {
           <button
             key={s}
             onClick={() => updateFilter('status', s)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              status === s ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-100'
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              status === s
+                ? 'bg-apple-dark text-white'
+                : 'glass-light text-apple-gray hover:text-apple-dark'
             }`}
           >
             {s === 'ALL' ? 'All' : s}
@@ -56,42 +58,46 @@ export default function AdminOrders() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading...</div>
+        <div className="flex items-center justify-center py-16">
+          <div className="shimmer w-6 h-6 rounded-full" />
+        </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr className="text-left text-gray-500">
-                  <th className="px-4 py-3">Order #</th>
-                  <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => (
-                  <tr key={order.order_id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{order.order_number}</td>
-                    <td className="px-4 py-3">
-                      <div>{order.customer_name}</div>
-                      <div className="text-xs text-gray-400">{order.customer_email}</div>
-                    </td>
-                    <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
-                    <td className="px-4 py-3 font-medium">${parseFloat(order.total_amount).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-gray-500">{new Date(order.order_date).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">
-                      <Link to={`/admin/orders/${order.order_id}`} className="text-blue-600 hover:underline text-xs">View Details</Link>
-                    </td>
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-apple-gray-4/50 text-left text-apple-gray">
+                    <th className="px-4 py-3 font-medium">Order #</th>
+                    <th className="px-4 py-3 font-medium">Customer</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Amount</th>
+                    <th className="px-4 py-3 font-medium">Date</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
-                ))}
-                {orders.length === 0 && (
-                  <tr><td colSpan={6} className="text-center py-8 text-gray-500">No orders found</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.order_id} className="border-b border-apple-gray-4/30 last:border-b-0 hover:bg-white/40 transition-colors">
+                      <td className="px-4 py-2.5 font-medium text-apple-dark">{order.order_number}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="text-apple-dark">{order.customer_name}</div>
+                        <div className="text-[10px] text-apple-gray">{order.customer_email}</div>
+                      </td>
+                      <td className="px-4 py-2.5"><OrderStatusBadge status={order.status} /></td>
+                      <td className="px-4 py-2.5 font-medium text-apple-dark">${parseFloat(order.total_amount).toFixed(2)}</td>
+                      <td className="px-4 py-2.5 text-apple-gray">{new Date(order.order_date).toLocaleDateString()}</td>
+                      <td className="px-4 py-2.5">
+                        <Link to={`/admin/orders/${order.order_id}`} className="text-apple-blue hover:underline">View Details</Link>
+                      </td>
+                    </tr>
+                  ))}
+                  {orders.length === 0 && (
+                    <tr><td colSpan={6} className="text-center py-12 text-apple-gray">No orders found</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
           <Pagination meta={meta} onPageChange={(p) => updateFilter('page', p)} />
         </>

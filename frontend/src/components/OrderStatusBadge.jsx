@@ -1,18 +1,18 @@
 const STATUS_CONFIG = {
-  PENDING: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', icon: '⏳' },
-  CONFIRMED: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800', icon: '✅' },
-  SHIPPED: { label: 'Shipped', color: 'bg-purple-100 text-purple-800', icon: '🚚' },
-  COMPLETED: { label: 'Completed', color: 'bg-green-100 text-green-800', icon: '✔️' },
-  CANCELLED: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: '❌' },
-  HOLD: { label: 'On Hold', color: 'bg-orange-100 text-orange-800', icon: '⏸️' },
+  PENDING: { label: 'Pending', bg: 'bg-amber-500/10', text: 'text-amber-600', dot: 'bg-amber-500' },
+  CONFIRMED: { label: 'Confirmed', bg: 'bg-apple-blue/10', text: 'text-apple-blue', dot: 'bg-apple-blue' },
+  SHIPPED: { label: 'Shipped', bg: 'bg-purple-500/10', text: 'text-purple-600', dot: 'bg-purple-500' },
+  COMPLETED: { label: 'Completed', bg: 'bg-apple-green/10', text: 'text-apple-green', dot: 'bg-apple-green' },
+  CANCELLED: { label: 'Cancelled', bg: 'bg-apple-red/10', text: 'text-apple-red', dot: 'bg-apple-red' },
+  HOLD: { label: 'On Hold', bg: 'bg-apple-orange/10', text: 'text-apple-orange', dot: 'bg-apple-orange' },
 };
 
 export default function OrderStatusBadge({ status }) {
-  const config = STATUS_CONFIG[status] || { label: status, color: 'bg-gray-100 text-gray-800', icon: '?' };
+  const config = STATUS_CONFIG[status] || { label: status, bg: 'bg-gray-100', text: 'text-apple-gray', dot: 'bg-apple-gray' };
 
   return (
-    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
-      <span>{config.icon}</span>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
       {config.label}
     </span>
   );
