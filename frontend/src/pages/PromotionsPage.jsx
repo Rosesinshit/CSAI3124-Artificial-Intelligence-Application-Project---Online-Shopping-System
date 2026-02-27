@@ -59,7 +59,7 @@ export default function PromotionsPage() {
         canonical={`${window.location.origin}/promotions`}
       />
 
-      <h1 className="section-heading">Promotions & Deals</h1>
+      <h1 className="section-heading mb-5">Promotions & Deals</h1>
 
       {promotions.length === 0 ? (
         <div className="text-center py-20">

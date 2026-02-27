@@ -68,7 +68,7 @@ export default function WishlistPage() {
 
   return (
     <div className="max-w-[980px] mx-auto px-4 py-10">
-      <h1 className="section-heading">Wish List</h1>
+      <h1 className="section-heading mb-5">Wish List</h1>
 
       {/* Notifications */}
       {notifications.total_notifications > 0 && (

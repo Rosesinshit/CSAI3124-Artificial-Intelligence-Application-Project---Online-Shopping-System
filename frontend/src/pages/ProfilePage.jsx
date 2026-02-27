@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-10">
-      <h1 className="section-heading">My Profile</h1>
+      <h1 className="section-heading mb-5">My Profile</h1>
 
       <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 space-y-4">
         {success && <div className="bg-apple-green/5 border border-apple-green/10 text-apple-green p-3 rounded-xl text-sm">{success}</div>}

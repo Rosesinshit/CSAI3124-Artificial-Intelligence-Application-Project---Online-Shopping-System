@@ -67,7 +67,7 @@ export default function ProductListPage() {
         keywords={activeCategoryName ? `${activeCategoryName.toLowerCase()}, shopping, buy online` : 'products, shopping, buy online'}
         canonical={slug ? `/category/${slug}` : '/products'}
       />
-      <h1 className="section-heading">{activeCategoryName || 'All Products'}</h1>
+      <h1 className="section-heading mb-5">{activeCategoryName || 'All Products'}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-8">

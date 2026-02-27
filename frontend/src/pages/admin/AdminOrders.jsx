@@ -38,7 +38,7 @@ export default function AdminOrders() {
 
   return (
     <div className="max-w-[980px] mx-auto px-4 py-10">
-      <h1 className="section-heading">Order Management</h1>
+      <h1 className="section-heading mb-5">Order Management</h1>
 
       {/* Status Filters */}
       <div className="flex flex-wrap gap-2 mb-6">

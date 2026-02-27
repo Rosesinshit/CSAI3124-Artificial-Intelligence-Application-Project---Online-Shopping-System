@@ -56,7 +56,7 @@ export default function HomePage() {
       {/* Categories */}
       {categories.length > 0 && (
         <section className="max-w-[980px] mx-auto px-4 py-14">
-          <h2 className="section-heading mb-8">Shop by Category</h2>
+          <h2 className="section-heading mb-7">Shop by Category</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {categories.map((cat) => (
               <Link

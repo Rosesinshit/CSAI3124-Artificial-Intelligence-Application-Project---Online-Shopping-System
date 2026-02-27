@@ -108,7 +108,7 @@ export default function AdminProductForm() {
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
         Back to Products
       </Link>
-      <h1 className="section-heading">{isEdit ? 'Edit Product' : 'New Product'}</h1>
+      <h1 className="section-heading mb-5">{isEdit ? 'Edit Product' : 'New Product'}</h1>
 
       {error && <div className="bg-apple-red/5 border border-apple-red/10 text-apple-red p-3 rounded-2xl mb-5 text-xs">{error}</div>}
 

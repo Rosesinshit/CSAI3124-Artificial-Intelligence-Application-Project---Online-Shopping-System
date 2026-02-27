@@ -94,9 +94,9 @@ async function seed() {
         category: cats['laptops'],
         tags: ['premium', 'featured', 'bestseller'],
         images: [
-          'https://picsum.photos/seed/laptop1/600/600',
-          'https://picsum.photos/seed/laptop2/600/600',
-          'https://picsum.photos/seed/laptop3/600/600',
+          'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Brand', value: 'ProTech' },
@@ -114,8 +114,8 @@ async function seed() {
         category: cats['smartphones'],
         tags: ['premium', 'new', 'featured'],
         images: [
-          'https://picsum.photos/seed/phone1/600/600',
-          'https://picsum.photos/seed/phone2/600/600',
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Brand', value: 'VisionTech' },
@@ -131,8 +131,8 @@ async function seed() {
         category: cats['electronics'],
         tags: ['wireless', 'premium', 'sale', 'bestseller'],
         images: [
-          'https://picsum.photos/seed/headphone1/600/600',
-          'https://picsum.photos/seed/headphone2/600/600',
+          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Brand', value: 'SoundWave' },
@@ -148,9 +148,9 @@ async function seed() {
         category: cats['mens'],
         tags: ['bestseller'],
         images: [
-          'https://picsum.photos/seed/shirt1/600/600',
-          'https://picsum.photos/seed/shirt2/600/600',
-          'https://picsum.photos/seed/shirt3/600/600',
+          'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1598033129183-c4f50c736c10?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Material', value: '100% Cotton Oxford' },
@@ -165,8 +165,8 @@ async function seed() {
         category: cats['womens'],
         tags: ['sale', 'eco-friendly', 'new'],
         images: [
-          'https://picsum.photos/seed/jacket1/600/600',
-          'https://picsum.photos/seed/jacket2/600/600',
+          'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Material', value: 'Recycled Polyester' },
@@ -180,8 +180,8 @@ async function seed() {
         category: cats['home-kitchen'],
         tags: ['featured', 'wireless'],
         images: [
-          'https://picsum.photos/seed/coffee1/600/600',
-          'https://picsum.photos/seed/coffee2/600/600',
+          'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Capacity', value: '12 Cups / 1.8L' },
@@ -196,8 +196,8 @@ async function seed() {
         category: cats['home-kitchen'],
         tags: ['premium', 'sale'],
         images: [
-          'https://picsum.photos/seed/chair1/600/600',
-          'https://picsum.photos/seed/chair2/600/600',
+          'https://images.unsplash.com/photo-1589384267710-7a170981ca78?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Weight Capacity', value: '150 kg / 330 lbs' },
@@ -211,7 +211,7 @@ async function seed() {
         category: cats['books'],
         tags: ['bestseller'],
         images: [
-          'https://picsum.photos/seed/book1/600/600',
+          'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Author', value: 'Douglas Crockford' },
@@ -226,8 +226,8 @@ async function seed() {
         category: cats['sports'],
         tags: ['eco-friendly', 'sale', 'portable'],
         images: [
-          'https://picsum.photos/seed/yoga1/600/600',
-          'https://picsum.photos/seed/yoga2/600/600',
+          'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Thickness', value: '6mm' },
@@ -242,8 +242,8 @@ async function seed() {
         category: cats['electronics'],
         tags: ['wireless', 'portable', 'new'],
         images: [
-          'https://picsum.photos/seed/speaker1/600/600',
-          'https://picsum.photos/seed/speaker2/600/600',
+          'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=600&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1589003077984-894e133dabab?w=600&h=600&fit=crop',
         ],
         attrs: [
           { name: 'Brand', value: 'SoundWave' },
@@ -298,15 +298,15 @@ async function seed() {
     const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     const { rows: [promo1] } = await client.query(
-      `INSERT INTO promotion (name, description, type, value, start_date, end_date, is_active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING promotion_id`,
-      ['Summer Tech Sale', 'Up to 20% off on electronics!', 'percentage', 20, now.toISOString(), in30Days.toISOString(), true]
+      `INSERT INTO promotion (name, type, discount_value, start_date, end_date, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING promotion_id`,
+      ['Summer Tech Sale', 'percentage', 20, now.toISOString(), in30Days.toISOString(), true]
     );
 
     const { rows: [promo2] } = await client.query(
-      `INSERT INTO promotion (name, description, type, value, start_date, end_date, is_active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING promotion_id`,
-      ['Flash Deal', '$15 off selected items', 'fixed', 15, now.toISOString(), in7Days.toISOString(), true]
+      `INSERT INTO promotion (name, type, discount_value, start_date, end_date, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING promotion_id`,
+      ['Flash Deal', 'fixed', 15, now.toISOString(), in7Days.toISOString(), true]
     );
 
     // Get some product IDs to link to promotions
