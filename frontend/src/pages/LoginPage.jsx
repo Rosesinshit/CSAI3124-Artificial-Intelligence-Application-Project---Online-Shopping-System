@@ -40,7 +40,7 @@ export default function LoginPage() {
       {/* Login card */}
       <div className="w-full max-w-[420px]">
         <div
-          className="rounded-3xl p-8 border border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.4)] relative overflow-hidden"
+          className="rounded-3xl p-8 border-2 border-blue-500 relative overflow-hidden"
           style={{
             background: 'rgba(10, 10, 15, 0.4)',
             backdropFilter: 'blur(20px)',

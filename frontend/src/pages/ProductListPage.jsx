@@ -13,6 +13,7 @@ export default function ProductListPage() {
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeCategoryName, setActiveCategoryName] = useState('');
+  const [categorySeo, setCategorySeo] = useState(null);
 
   const page = parseInt(searchParams.get('page')) || 1;
   const category = searchParams.get('category') || '';
@@ -30,11 +31,16 @@ export default function ProductListPage() {
       setCategories(allCats);
 
       let categoryId = category;
+      setCategorySeo(null);
       if (slug) {
         const matched = allCats.find(c => c.slug === slug);
         if (matched) {
           categoryId = matched.category_id;
           setActiveCategoryName(matched.name);
+          // Fetch category SEO data from backend
+          api.get(`/seo/category/${slug}`).then(seoRes => {
+            setCategorySeo(seoRes.data.data);
+          }).catch(() => {});
         }
       } else if (categoryId) {
         const matched = allCats.find(c => String(c.category_id) === String(categoryId));
@@ -62,10 +68,16 @@ export default function ProductListPage() {
   return (
     <div className="max-w-[980px] mx-auto px-4 py-10">
       <SEOHead
-        title={activeCategoryName ? `${activeCategoryName} - ShopOnline` : 'All Products - ShopOnline'}
-        description={activeCategoryName ? `Browse ${activeCategoryName} products at great prices.` : 'Browse our full product catalog.'}
+        title={categorySeo?.metaTags?.title || (activeCategoryName ? `${activeCategoryName} - ShopOnline` : 'All Products - ShopOnline')}
+        description={categorySeo?.metaTags?.description || (activeCategoryName ? `Browse ${activeCategoryName} products at great prices.` : 'Browse our full product catalog.')}
         keywords={activeCategoryName ? `${activeCategoryName.toLowerCase()}, shopping, buy online` : 'products, shopping, buy online'}
-        canonical={slug ? `/category/${slug}` : '/products'}
+        canonical={categorySeo?.metaTags?.canonical || (slug ? `${window.location.origin}/category/${slug}` : `${window.location.origin}/products`)}
+        ogTitle={categorySeo?.metaTags?.ogTitle}
+        ogDescription={categorySeo?.metaTags?.ogDescription}
+        ogUrl={categorySeo?.metaTags?.ogUrl}
+        ogType={categorySeo?.metaTags?.ogType}
+        ogSiteName={categorySeo?.metaTags?.ogSiteName}
+        jsonLd={categorySeo?.breadcrumbLd}
       />
       <h1 className="section-heading mb-5">{activeCategoryName || 'All Products'}</h1>
 

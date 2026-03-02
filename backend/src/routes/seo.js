@@ -90,12 +90,14 @@ router.get('/product/:id', async (req, res) => {
     const { id } = req.params;
     const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
 
+    // Use product_id if numeric, otherwise match by slug
+    const isNumeric = /^[0-9]+$/.test(id);
     const result = await db.query(
       `SELECT p.*, c.name as category_name, c.slug as category_slug
-       FROM product p 
+       FROM product p
        LEFT JOIN category c ON p.category_id = c.category_id
-       WHERE (p.product_id = $1 OR p.slug = $1) AND p.is_active = true`,
-      [id]
+       WHERE (${isNumeric ? 'p.product_id = $1' : 'p.slug = $1'}) AND p.is_active = true`,
+      [isNumeric ? parseInt(id, 10) : id]
     );
 
     if (result.rows.length === 0) {

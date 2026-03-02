@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../api';
 import ProductCard from '../components/ProductCard';
 import Pagination from '../components/Pagination';
+import SEOHead from '../components/SEOHead';
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -74,6 +75,12 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-[980px] mx-auto px-4 py-10">
+      <SEOHead
+        title={q ? `Search: "${q}" | ShopOnline` : 'Search Products | ShopOnline'}
+        description={q ? `Search results for "${q}" at ShopOnline.` : 'Search our full product catalog at ShopOnline.'}
+        canonical={`${window.location.origin}/search${q ? `?q=${encodeURIComponent(q)}` : ''}`}
+        noindex={true}
+      />
       <h1 className="section-heading !text-left">
         {q ? `Results for "${q}"` : 'Search'}
       </h1>

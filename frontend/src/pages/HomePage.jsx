@@ -33,7 +33,19 @@ export default function HomePage() {
         title="ShopOnline - Discover Amazing Products at Great Prices"
         description="Shop the latest electronics, clothing, home goods, books and more at competitive prices. Free shipping on orders over $50."
         keywords="online shopping, electronics, clothing, home goods, books, deals"
+        canonical={`${window.location.origin}/`}
         ogType="website"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'ShopOnline',
+          url: `${window.location.origin}/`,
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${window.location.origin}/search?q={search_term_string}`,
+            'query-input': 'required name=search_term_string',
+          },
+        }}
       />
       {/* Hero Section */}
       <section className="bg-[#000] text-white">
