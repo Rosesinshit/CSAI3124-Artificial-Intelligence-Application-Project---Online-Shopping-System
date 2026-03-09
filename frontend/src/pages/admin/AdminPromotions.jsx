@@ -323,7 +323,7 @@ export default function AdminPromotions() {
 
       {meta.totalPages > 1 && (
         <div className="mt-6">
-          <Pagination page={page} totalPages={meta.totalPages} onPageChange={setPage} />
+          <Pagination meta={{ page, totalPages: meta.totalPages }} onPageChange={setPage} />
         </div>
       )}
     </div>

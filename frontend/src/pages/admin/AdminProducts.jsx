@@ -11,10 +11,11 @@ export default function AdminProducts() {
 
   const page = parseInt(searchParams.get('page')) || 1;
   const q = searchParams.get('q') || '';
+  const sort = searchParams.get('sort') || 'newest';
 
   const fetchProducts = () => {
     setLoading(true);
-    const params = new URLSearchParams({ page, limit: 15 });
+    const params = new URLSearchParams({ page, limit: 15, sort });
     if (q) params.set('q', q);
 
     api.get(`/admin/products?${params}`)
@@ -26,7 +27,15 @@ export default function AdminProducts() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchProducts(); }, [page, q]);
+  useEffect(() => { fetchProducts(); }, [page, q, sort]);
+
+  const updateParam = (key, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set(key, value);
+    else params.delete(key);
+    if (key !== 'page') params.set('page', '1');
+    setSearchParams(params);
+  };
 
   const toggleStatus = async (productId, currentStatus) => {
     try {
@@ -56,18 +65,35 @@ export default function AdminProducts() {
         </Link>
       </div>
 
-      {/* Search */}
-      <form
-        onSubmit={(e) => { e.preventDefault(); setSearchParams({ q: e.target.q.value, page: '1' }); }}
-        className="mb-6"
-      >
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Search by name or SKU..."
-          className="glass-input !w-auto min-w-[280px]"
-        />
-      </form>
+      {/* Search & Sort */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <form
+          onSubmit={(e) => { e.preventDefault(); updateParam('q', e.target.q.value); }}
+        >
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Search by name, SKU, or product ID..."
+            className="glass-input !w-auto min-w-[280px]"
+          />
+        </form>
+        <select
+          value={sort}
+          onChange={(e) => updateParam('sort', e.target.value)}
+          className="glass-input !w-auto !py-1.5 !text-xs"
+        >
+          <option value="newest">Sort: Newest First</option>
+          <option value="oldest">Sort: Oldest First</option>
+          <option value="name_asc">Sort: Name A–Z</option>
+          <option value="name_desc">Sort: Name Z–A</option>
+          <option value="price_asc">Sort: Price Low → High</option>
+          <option value="price_desc">Sort: Price High → Low</option>
+          <option value="stock_asc">Sort: Stock Low → High</option>
+          <option value="stock_desc">Sort: Stock High → Low</option>
+          <option value="id_asc">Sort: ID Ascending</option>
+          <option value="id_desc">Sort: ID Descending</option>
+        </select>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
@@ -80,6 +106,7 @@ export default function AdminProducts() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-apple-gray-4/50 text-left text-apple-gray">
+                    <th className="px-4 py-3 font-medium">ID</th>
                     <th className="px-4 py-3 font-medium">Image</th>
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">SKU</th>
@@ -92,6 +119,7 @@ export default function AdminProducts() {
                 <tbody>
                   {products.map((product) => (
                     <tr key={product.product_id} className="border-b border-apple-gray-4/30 last:border-b-0 hover:bg-white/40 transition-colors">
+                      <td className="px-4 py-2.5 text-apple-gray font-mono text-[11px]">{product.product_id}</td>
                       <td className="px-4 py-2.5">
                         <img
                           src={product.primary_image || 'https://via.placeholder.com/40x40?text=No'}
@@ -137,7 +165,7 @@ export default function AdminProducts() {
                     </tr>
                   ))}
                   {products.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-12 text-apple-gray">No products found</td></tr>
+                    <tr><td colSpan={8} className="text-center py-12 text-apple-gray">No products found</td></tr>
                   )}
                 </tbody>
               </table>

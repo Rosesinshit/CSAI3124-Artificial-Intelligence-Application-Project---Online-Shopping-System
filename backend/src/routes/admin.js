@@ -20,14 +20,14 @@ router.use(requireAdmin);
 router.get('/products', async (req, res) => {
   try {
     const { page, limit, offset } = getPagination(req.query);
-    const { q, is_active } = req.query;
+    const { q, is_active, sort } = req.query;
 
     let whereClause = 'WHERE 1=1';
     const params = [];
     let paramIndex = 1;
 
     if (q) {
-      whereClause += ` AND (p.name ILIKE $${paramIndex} OR p.sku ILIKE $${paramIndex})`;
+      whereClause += ` AND (p.name ILIKE $${paramIndex} OR p.sku ILIKE $${paramIndex} OR CAST(p.product_id AS TEXT) ILIKE $${paramIndex})`;
       params.push(`%${q}%`);
       paramIndex++;
     }
@@ -36,6 +36,21 @@ router.get('/products', async (req, res) => {
       params.push(is_active === 'true');
       paramIndex++;
     }
+
+    // Sort options for admin
+    const sortOptions = {
+      newest: 'p.created_at DESC',
+      oldest: 'p.created_at ASC',
+      name_asc: 'p.name ASC',
+      name_desc: 'p.name DESC',
+      price_asc: 'p.price ASC',
+      price_desc: 'p.price DESC',
+      stock_asc: 'p.stock_quantity ASC',
+      stock_desc: 'p.stock_quantity DESC',
+      id_asc: 'p.product_id ASC',
+      id_desc: 'p.product_id DESC',
+    };
+    const orderBy = sortOptions[sort] || sortOptions.newest;
 
     const countResult = await db.query(`SELECT COUNT(*) FROM product p ${whereClause}`, params);
     const total = parseInt(countResult.rows[0].count);
@@ -46,7 +61,7 @@ router.get('/products', async (req, res) => {
        FROM product p
        LEFT JOIN category c ON p.category_id = c.category_id
        ${whereClause}
-       ORDER BY p.created_at DESC
+       ORDER BY ${orderBy}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]
     );

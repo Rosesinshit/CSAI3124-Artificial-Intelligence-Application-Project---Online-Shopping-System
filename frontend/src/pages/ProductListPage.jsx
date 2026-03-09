@@ -9,9 +9,12 @@ export default function ProductListPage() {
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [mobileProducts, setMobileProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
   const [activeCategoryName, setActiveCategoryName] = useState('');
   const [categorySeo, setCategorySeo] = useState(null);
 
@@ -21,6 +24,8 @@ export default function ProductListPage() {
 
   useEffect(() => {
     setLoading(true);
+    setMobileProducts([]);
+    setMobilePage(1);
     const params = new URLSearchParams({ page, limit: 12, sort });
 
     // If we have a slug from /category/:slug route, resolve it to category ID
@@ -53,9 +58,32 @@ export default function ProductListPage() {
       return api.get(`/products?${params}`);
     }).then((prodRes) => {
       setProducts(prodRes.data.data);
+      setMobileProducts(prodRes.data.data);
       setMeta(prodRes.data.meta);
     }).catch(console.error).finally(() => setLoading(false));
   }, [page, category, sort, slug]);
+
+  const handleLoadMore = () => {
+    const nextPage = mobilePage + 1;
+    setLoadingMore(true);
+    const params = new URLSearchParams({ page: nextPage, limit: 12, sort });
+
+    let categoryId = category;
+    if (slug) {
+      const matched = categories.find(c => c.slug === slug);
+      if (matched) categoryId = matched.category_id;
+    }
+    if (categoryId) params.set('category', categoryId);
+
+    api.get(`/products?${params}`)
+      .then((res) => {
+        setMobileProducts(prev => [...prev, ...res.data.data]);
+        setMeta(res.data.meta);
+        setMobilePage(nextPage);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingMore(false));
+  };
 
   const updateParam = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -114,10 +142,21 @@ export default function ProductListPage() {
         <div className="text-center py-20 text-apple-gray text-sm">No products found.</div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Desktop: show current page products */}
+          <div className="hidden lg:grid grid-cols-4 gap-4">
             {products.map((p) => <ProductCard key={p.product_id} product={p} />)}
           </div>
-          <Pagination meta={meta} onPageChange={(p) => updateParam('page', p)} />
+          {/* Mobile: show accumulated products */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 lg:hidden">
+            {mobileProducts.map((p) => <ProductCard key={p.product_id} product={p} />)}
+          </div>
+          <Pagination
+            meta={meta}
+            onPageChange={(p) => updateParam('page', p)}
+            onLoadMore={handleLoadMore}
+            loadingMore={loadingMore}
+            mobilePage={mobilePage}
+          />
         </>
       )}
     </div>

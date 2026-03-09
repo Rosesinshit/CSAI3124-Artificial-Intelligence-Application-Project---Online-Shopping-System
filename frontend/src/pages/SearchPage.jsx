@@ -8,10 +8,13 @@ import SEOHead from '../components/SEOHead';
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [mobileProducts, setMobileProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
 
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
@@ -28,6 +31,8 @@ export default function SearchPage() {
 
   useEffect(() => {
     setLoading(true);
+    setMobileProducts([]);
+    setMobilePage(1);
     const params = new URLSearchParams({ page, limit: 12, sort });
     if (q) params.set('q', q);
     if (category) params.set('category', category);
@@ -38,6 +43,7 @@ export default function SearchPage() {
     api.get(`/products/search?${params}`)
       .then((res) => {
         setProducts(res.data.data);
+        setMobileProducts(res.data.data);
         setMeta(res.data.meta);
       })
       .catch(console.error)
@@ -71,6 +77,26 @@ export default function SearchPage() {
     else params.delete('max_price');
     params.set('page', '1');
     setSearchParams(params);
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = mobilePage + 1;
+    setLoadingMore(true);
+    const params = new URLSearchParams({ page: nextPage, limit: 12, sort });
+    if (q) params.set('q', q);
+    if (category) params.set('category', category);
+    if (selectedTags) params.set('tags', selectedTags);
+    if (minPrice) params.set('min_price', minPrice);
+    if (maxPrice) params.set('max_price', maxPrice);
+
+    api.get(`/products/search?${params}`)
+      .then((res) => {
+        setMobileProducts(prev => [...prev, ...res.data.data]);
+        setMeta(res.data.meta);
+        setMobilePage(nextPage);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingMore(false));
   };
 
   return (
@@ -124,16 +150,16 @@ export default function SearchPage() {
                 placeholder="Min"
                 value={localMinPrice}
                 onChange={(e) => setLocalMinPrice(e.target.value)}
-                className="glass-input text-sm !py-1.5"
+                className="glass-input text-sm !py-1.5 min-w-0 flex-1"
               />
-              <span className="text-apple-gray text-xs self-center">–</span>
+              <span className="text-apple-gray text-xs self-center flex-shrink-0">–</span>
               <input
                 type="number"
                 min="0"
                 placeholder="Max"
                 value={localMaxPrice}
                 onChange={(e) => setLocalMaxPrice(e.target.value)}
-                className="glass-input text-sm !py-1.5"
+                className="glass-input text-sm !py-1.5 min-w-0 flex-1"
               />
             </div>
             <button
@@ -196,10 +222,21 @@ export default function SearchPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {/* Desktop: show current page products */}
+              <div className="hidden lg:grid grid-cols-3 gap-5">
                 {products.map((p) => <ProductCard key={p.product_id} product={p} />)}
               </div>
-              <Pagination meta={meta} onPageChange={(p) => updateParam('page', p)} />
+              {/* Mobile: show accumulated products */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 lg:hidden">
+                {mobileProducts.map((p) => <ProductCard key={p.product_id} product={p} />)}
+              </div>
+              <Pagination
+                meta={meta}
+                onPageChange={(p) => updateParam('page', p)}
+                onLoadMore={handleLoadMore}
+                loadingMore={loadingMore}
+                mobilePage={mobilePage}
+              />
             </>
           )}
         </div>
