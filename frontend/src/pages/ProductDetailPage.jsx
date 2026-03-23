@@ -14,7 +14,7 @@ export default function ProductDetailPage() {
   const { addToCart } = useCart();
   const { isInWishlist, getWishlistItemId, addToWishlist, removeFromWishlist } = useWishlist();
   const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [seoData, setSeoData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -27,23 +27,65 @@ export default function ProductDetailPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+
     setLoading(true);
+    setError('');
+    setSeoData(null);
+    setRecommendedProducts([]);
     setSelectedImage(0);
     setQuantity(1);
     setAddedToCart(false);
 
-    Promise.all([
-      api.get(`/products/${id}`),
-      api.get(`/products/${id}/related?limit=4`),
-    ]).then(([prodRes, relRes]) => {
-      setProduct(prodRes.data.data);
-      setRelatedProducts(relRes.data.data);
-      // Fetch SEO data (Block Y)
-      api.get(`/seo/product/${prodRes.data.data.product_id}`).then(seoRes => {
-        setSeoData(seoRes.data.data);
-      }).catch(() => {}); // SEO data is optional
-    }).catch(() => setError('Product not found'))
-      .finally(() => setLoading(false));
+    async function loadProductPage() {
+      try {
+        const productResponse = await api.get(`/products/${id}`);
+        const nextProduct = productResponse.data.data;
+
+        if (cancelled) {
+          return;
+        }
+
+        setProduct(nextProduct);
+
+        const [recommendationResponse, seoResponse] = await Promise.allSettled([
+          api.get(`/recommendations/similar/${nextProduct.product_id}?limit=4`),
+          api.get(`/seo/product/${nextProduct.product_id}`),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (recommendationResponse.status === 'fulfilled') {
+          setRecommendedProducts(recommendationResponse.value.data.data || []);
+        } else {
+          setRecommendedProducts([]);
+        }
+
+        if (seoResponse.status === 'fulfilled') {
+          setSeoData(seoResponse.value.data.data);
+        } else {
+          setSeoData(null);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError('Product not found');
+          setProduct(null);
+          setRecommendedProducts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProductPage();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const handleAddToCart = async () => {
@@ -387,13 +429,31 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Related Products */}
-      {relatedProducts.length > 0 && (
+      {/* Block S: Similar recommendations */}
+      {recommendedProducts.length > 0 && (
         <section>
-          <h2 className="section-heading">Related Products</h2>
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="section-heading !mb-1">You May Also Like</h2>
+              <p className="text-xs text-apple-gray">Ranked from shared category, tag, and shopper behavior signals.</p>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.product_id} product={p} />
+            {recommendedProducts.map((p) => (
+              <ProductCard
+                key={p.product_id}
+                product={p}
+                reason={p.recommendation_reason}
+                tracking={{
+                  actionType: 'CLICK_RECOMMENDATION',
+                  metadata: {
+                    source: 'product_detail_similar',
+                    recommendation_id: p.recommendation_id || null,
+                    algorithm_type: p.algorithm_type || null,
+                    seed_product_id: product.product_id,
+                  },
+                }}
+              />
             ))}
           </div>
         </section>

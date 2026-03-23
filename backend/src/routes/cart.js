@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
+const { trackBehavior } = require('../services/recommendations');
 
 // All cart routes require authentication
 router.use(authenticate);
@@ -97,6 +98,13 @@ router.post('/items', [
        RETURNING *`,
       [cartId, product_id, quantity]
     );
+
+    await trackBehavior({
+      userId: req.user.user_id,
+      productId: Number(product_id),
+      actionType: 'ADD_TO_CART',
+      metadata: { quantity: Number(quantity) },
+    });
 
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {

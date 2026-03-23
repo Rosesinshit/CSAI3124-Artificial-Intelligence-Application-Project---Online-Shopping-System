@@ -13,6 +13,8 @@ const tagRoutes = require('./routes/tags');
 const wishlistRoutes = require('./routes/wishlist');
 const promotionRoutes = require('./routes/promotions');
 const seoRoutes = require('./routes/seo');
+const recommendationRoutes = require('./routes/recommendations');
+const behaviorRoutes = require('./routes/behaviors');
 
 const app = express();
 
@@ -35,6 +37,8 @@ app.use('/api/v1/tags', tagRoutes);
 app.use('/api/v1/wishlist', wishlistRoutes);
 app.use('/api/v1/promotions', promotionRoutes);
 app.use('/api/v1/seo', seoRoutes);
+app.use('/api/v1/recommendations', recommendationRoutes);
+app.use('/api/v1/behaviors', behaviorRoutes);
 
 // SEO: Serve sitemap.xml and robots.txt at root level (Block Y)
 app.use('/', seoRoutes);

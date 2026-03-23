@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const { optionalAuth } = require('../middleware/auth');
 const { getPagination, paginationMeta } = require('../utils/helpers');
+const { trackBehavior } = require('../services/recommendations');
 
 // GET /api/v1/products - List products (paginated) (A3)
 router.get('/', optionalAuth, async (req, res) => {
@@ -151,6 +152,21 @@ router.get('/search', optionalAuth, async (req, res) => {
       [...params, limit, offset]
     );
 
+    if (req.user && q && q.trim()) {
+      await trackBehavior({
+        userId: req.user.user_id,
+        actionType: 'SEARCH',
+        metadata: {
+          query: q.trim(),
+          category: category || null,
+          tags: tags || null,
+          min_price: min_price || null,
+          max_price: max_price || null,
+          result_count: result.rows.length,
+        },
+      });
+    }
+
     res.json({
       success: true,
       data: result.rows,
@@ -184,6 +200,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
 
     const product = result.rows[0];
+  const productId = product.product_id;
 
     // Get active promotional pricing (Block U)
     const promotions = await db.query(
@@ -194,7 +211,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
        WHERE pp.product_id = $1 AND pr.is_active = true
          AND pr.start_date <= CURRENT_DATE AND pr.end_date >= CURRENT_DATE
        ORDER BY pp.promotional_price ASC`,
-      [id]
+      [productId]
     );
     if (promotions.rows.length > 0) {
       product.promotional_price = promotions.rows[0].promotional_price;
@@ -205,13 +222,13 @@ router.get('/:id', optionalAuth, async (req, res) => {
     // Get images (B1)
     const images = await db.query(
       'SELECT * FROM product_image WHERE product_id = $1 ORDER BY sort_order, image_id',
-      [id]
+      [productId]
     );
 
     // Get attributes (C1)
     const attributes = await db.query(
       'SELECT * FROM product_attribute WHERE product_id = $1 ORDER BY attribute_id',
-      [id]
+      [productId]
     );
 
     // Get tags
@@ -219,12 +236,24 @@ router.get('/:id', optionalAuth, async (req, res) => {
       `SELECT pt.* FROM product_tag pt
        JOIN product_tag_mapping ptm ON pt.tag_id = ptm.tag_id
        WHERE ptm.product_id = $1`,
-      [id]
+      [productId]
     );
 
     product.images = images.rows;
     product.attributes = attributes.rows;
     product.tags = tags.rows;
+
+    if (req.user) {
+      await trackBehavior({
+        userId: req.user.user_id,
+        productId,
+        actionType: 'VIEW',
+        metadata: {
+          source: req.query.source || 'product_detail',
+          slug: product.slug,
+        },
+      });
+    }
 
     res.json({ success: true, data: product });
   } catch (error) {

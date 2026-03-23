@@ -4,6 +4,7 @@ const db = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 const { generateOrderNumber, getPagination, paginationMeta } = require('../utils/helpers');
+const { trackBehavior } = require('../services/recommendations');
 
 router.use(authenticate);
 
@@ -115,6 +116,20 @@ router.post('/', [
        VALUES ($1, NULL, 'PENDING', $2, 'Order placed')`,
       [order.order_id, req.user.email]
     );
+
+    for (const item of orderItems) {
+      await trackBehavior({
+        userId: req.user.user_id,
+        productId: item.product_id,
+        actionType: 'PURCHASE',
+        metadata: {
+          order_id: order.order_id,
+          quantity: item.quantity,
+          subtotal: item.subtotal,
+        },
+        client,
+      });
+    }
 
     // Clear cart
     await client.query('DELETE FROM cart_item WHERE cart_id = $1', [cartId]);

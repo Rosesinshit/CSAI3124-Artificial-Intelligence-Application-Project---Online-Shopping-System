@@ -68,7 +68,7 @@ Shopping-Website/
 │       ├── config/
 │       │   └── database.js               # PostgreSQL pool config
 │       ├── database/
-│       │   ├── schema.sql                # Full DDL (14 tables, indexes, triggers)
+│       │   ├── schema.sql                # Full DDL (19 tables, indexes, triggers)
 │       │   ├── init.js                   # Schema initialization script
 │       │   └── seed.js                   # Demo data seeder
 │       ├── middleware/
@@ -148,7 +148,7 @@ PostgreSQL connection pool via `pg.Pool`. Reads from environment variables with 
 
 | File | Purpose |
 |------|---------|
-| `schema.sql` | Complete DDL for 14 tables with indexes, foreign keys, CHECK constraints, and an `update_updated_at_column` trigger. Uses `CREATE TABLE IF NOT EXISTS` for safe re-runs. |
+| `schema.sql` | Complete DDL for 19 tables with indexes, foreign keys, recommendation/event tracking tables, and an `update_updated_at_column` trigger. Recreates the schema from scratch for clean local resets. |
 | `init.js` | CLI script — reads `schema.sql`, executes it against the database, creates `uploads/products/` directory, then exits. Run once before first use. |
 | `seed.js` | CLI script — truncates all data, then inserts: 2 users (admin + customer), 5 categories + 4 subcategories, 8 tags, 10 products with images/attributes/tags, and 2 active promotions linked to products. Transactional (rolls back on failure). |
 
@@ -172,6 +172,8 @@ PostgreSQL connection pool via `pg.Pool`. Reads from environment variables with 
 | `tags.js` | `/api/v1/tags` | Public | `GET /` (all tags with product_count via LEFT JOIN). |
 | `wishlist.js` | `/api/v1/wishlist` | Auth | `GET /` (items with current price + `price_dropped` flag), `POST /items` (add with price snapshot), `DELETE /items/:id`, `GET /check/:productId`, price alerts (`POST /price-alerts`, `DELETE /price-alerts/:id`), `GET /notifications` (price drops + triggered alerts). |
 | `promotions.js` | `/api/v1/promotions` | Mixed | Public: `GET /` (active promotions), `GET /:id` (detail), `GET /:id/products`. Admin: `POST /`, `PUT /:id`, `DELETE /:id`, `POST /:id/products` (link product), `DELETE /:id/products/:productId` (unlink). Supports percentage/fixed/special_price types. |
+| `recommendations.js` | `/api/v1/recommendations` | Mixed | Auth: `GET /` (hybrid personalized recommendations). Public: `GET /popular`, `GET /similar/:productId`. Uses collaborative, content-based, and popularity scoring with stock/promotional filtering. |
+| `behaviors.js` | `/api/v1/behaviors` | Auth | `POST /` to persist recommendation training events (`VIEW`, `ADD_TO_CART`, `PURCHASE`, `WISHLIST_ADD`, `SEARCH`, `CLICK_RECOMMENDATION`) with session and metadata payloads. |
 | `seo.js` | `/api/v1/seo` | Public | `GET /product/:id` (full SEO metadata), plus root-level `GET /sitemap.xml` and `GET /robots.txt`. See [SEO Implementation](#seo-implementation). |
 
 ### Utilities — `utils/helpers.js`
@@ -287,10 +289,10 @@ This section maps each block from `Project_Scope_and_Activity_List.md` to the ac
 
 | Requirement | Description | Status |
 |-------------|-------------|--------|
-| S1 | User behavior data collection | Planned — not yet implemented |
-| S2 | AI recommendation model | Planned — not yet implemented |
-| S3 | Recommendation API endpoints | Planned — not yet implemented |
-| S4 | UI integration | Related products (C4) serves as a rule-based alternative |
+| S1 | User behavior data collection | Implemented — product views, searches, add-to-cart, purchases, wish list adds, and recommendation clicks are persisted in `user_behavior`. |
+| S2 | AI recommendation model | Implemented — hybrid scorer combines collaborative filtering, content affinity, and popularity fallback with diversity and stock filtering. |
+| S3 | Recommendation API endpoints | Implemented — `GET /recommendations`, `GET /recommendations/popular`, `GET /recommendations/similar/:productId`, `POST /behaviors`. |
+| S4 | UI integration | Implemented — homepage now surfaces personalized/trending recommendations and product detail pages show AI-ranked similar products with click tracking. |
 
 ### Block U — Wish List & Promotional Pricing
 
@@ -374,13 +376,14 @@ User visits /product/123
 
 ## Database Schema
 
-14 tables organized by domain:
+19 tables organized by domain:
 
 | Domain | Tables | Key Relationships |
 |--------|--------|-------------------|
 | Users | `user` | Role: `customer` or `admin`. Email unique. |
 | Catalog | `category`, `product`, `product_image`, `product_tag`, `product_tag_mapping`, `product_attribute` | Category has self-referencing `parent_id`. Product belongs to category. Images/attributes/tags are 1-to-many or many-to-many. |
 | Commerce | `cart`, `cart_item`, `purchase_order`, `order_item`, `order_status_history` | Cart per user. Order created from cart (transactional). Status history tracks all transitions with timestamps and optional notes. |
+| Recommendations | `user_behavior`, `recommendation` | Behavior events capture shopper actions and feed the hybrid recommendation pipeline. Generated recommendation rows store ranked results and click feedback. |
 | Wishlist | `wishlist`, `wishlist_item`, `price_alert` | Wishlist per user. Items track `price_when_added`. Price alerts store `target_price` with `is_triggered` flag. |
 | Promotions | `promotion`, `product_promotion` | Promotions have type (percentage/fixed/special_price), value, date range. Linked to products via `product_promotion` with computed `promotional_price`. |
 

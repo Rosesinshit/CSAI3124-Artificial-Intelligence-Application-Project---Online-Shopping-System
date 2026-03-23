@@ -253,6 +253,41 @@ CREATE TABLE product_promotion (
 );
 
 -- ============================================
+-- User Behavior Tracking (Block S)
+-- ============================================
+CREATE TABLE user_behavior (
+    behavior_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    product_id INT REFERENCES product(product_id) ON DELETE CASCADE,
+    action_type VARCHAR(50) NOT NULL CHECK (action_type IN ('VIEW', 'ADD_TO_CART', 'PURCHASE', 'WISHLIST_ADD', 'SEARCH', 'CLICK_RECOMMENDATION')),
+    action_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    session_id TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX idx_user_behavior_user ON user_behavior(user_id);
+CREATE INDEX idx_user_behavior_product ON user_behavior(product_id);
+CREATE INDEX idx_user_behavior_action ON user_behavior(action_type);
+CREATE INDEX idx_user_behavior_time ON user_behavior(action_time DESC);
+
+-- ============================================
+-- Generated Recommendations (Block S)
+-- ============================================
+CREATE TABLE recommendation (
+    recommendation_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES product(product_id) ON DELETE CASCADE,
+    score DECIMAL(10, 4) NOT NULL,
+    algorithm_type VARCHAR(50) NOT NULL CHECK (algorithm_type IN ('hybrid', 'collaborative', 'content', 'popularity', 'similarity')),
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_clicked BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX idx_recommendation_user ON recommendation(user_id);
+CREATE INDEX idx_recommendation_product ON recommendation(product_id);
+CREATE INDEX idx_recommendation_generated_at ON recommendation(generated_at DESC);
+
+-- ============================================
 -- Price Drop Notifications (Block U)
 -- ============================================
 CREATE TABLE price_alert (

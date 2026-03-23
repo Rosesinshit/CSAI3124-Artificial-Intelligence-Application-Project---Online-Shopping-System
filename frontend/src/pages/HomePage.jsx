@@ -3,21 +3,30 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import ProductCard from '../components/ProductCard';
 import SEOHead from '../components/SEOHead';
+import { useAuth } from '../context/AuthContext';
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const recommendationEndpoint = user
+      ? '/recommendations?limit=4'
+      : '/recommendations/popular?limit=4';
+
     Promise.all([
       api.get('/products?limit=8&sort=newest'),
       api.get('/categories'),
-    ]).then(([prodRes, catRes]) => {
+      api.get(recommendationEndpoint),
+    ]).then(([prodRes, catRes, recommendationRes]) => {
       setProducts(prodRes.data.data);
       setCategories(catRes.data.data);
+      setRecommendations(recommendationRes.data.data || []);
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (
@@ -82,6 +91,45 @@ export default function HomePage() {
                 <h3 className="text-xs font-medium text-apple-dark tracking-tight">{cat.name}</h3>
                 <p className="text-[10px] text-apple-gray mt-0.5">{cat.product_count} products</p>
               </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Block S: Recommendation strip */}
+      {recommendations.length > 0 && (
+        <section className="max-w-[980px] mx-auto px-4 py-14">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="section-heading !mb-1">
+                {user ? 'Recommended for You' : 'Trending Now'}
+              </h2>
+              <p className="text-xs text-apple-gray">
+                {user
+                  ? 'Generated from your browsing, cart, wish list, and purchase patterns.'
+                  : 'Popular products based on recent shopper activity.'}
+              </p>
+            </div>
+            <Link to="/products" className="text-apple-blue text-xs hover:underline inline-flex items-center gap-0.5">
+              Browse Catalog
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {recommendations.map((product) => (
+              <ProductCard
+                key={product.product_id}
+                product={product}
+                reason={product.recommendation_reason}
+                tracking={{
+                  actionType: 'CLICK_RECOMMENDATION',
+                  metadata: {
+                    source: user ? 'home_personalized' : 'home_popular',
+                    recommendation_id: product.recommendation_id || null,
+                    algorithm_type: product.algorithm_type || null,
+                  },
+                }}
+              />
             ))}
           </div>
         </section>

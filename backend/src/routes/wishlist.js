@@ -4,6 +4,7 @@ const db = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 const { getPagination, paginationMeta } = require('../utils/helpers');
+const { trackBehavior } = require('../services/recommendations');
 
 // All wishlist routes require authentication
 router.use(authenticate);
@@ -110,6 +111,13 @@ router.post('/items', [
         error: { code: 'ALREADY_EXISTS', message: 'Product already in wish list' }
       });
     }
+
+    await trackBehavior({
+      userId: req.user.user_id,
+      productId: Number(product_id),
+      actionType: 'WISHLIST_ADD',
+      metadata: { price_when_added: currentPrice },
+    });
 
     res.status(201).json({ success: true, data: result.rows[0] });
   } catch (error) {
