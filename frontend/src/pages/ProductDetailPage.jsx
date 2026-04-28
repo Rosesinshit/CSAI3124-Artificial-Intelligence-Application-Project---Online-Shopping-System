@@ -435,7 +435,7 @@ export default function ProductDetailPage() {
           <div className="flex items-end justify-between gap-4 mb-6">
             <div>
               <h2 className="section-heading !mb-1">You May Also Like</h2>
-              <p className="text-xs text-apple-gray">Ranked from shared category, tag, and shopper behavior signals.</p>
+              <p className="text-xs text-apple-gray">Ranked from shared category, tag, shopper behavior, and semantic AI similarity signals.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

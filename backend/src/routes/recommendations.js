@@ -7,6 +7,7 @@ const {
   getSimilarRecommendations,
   normalizeLimit,
 } = require('../services/recommendations');
+const { getSemanticServiceHealth } = require('../services/semanticEmbeddings');
 
 // GET /api/v1/recommendations - personalized recommendations (Block S)
 router.get('/', authenticate, async (req, res) => {
@@ -72,6 +73,23 @@ router.get('/similar/:productId', optionalAuth, async (req, res) => {
       error: {
         code: error.code || 'INTERNAL_ERROR',
         message: error.message || 'Failed to get similar products',
+      },
+    });
+  }
+});
+
+// GET /api/v1/recommendations/semantic/health - semantic AI service health
+router.get('/semantic/health', async (req, res) => {
+  try {
+    const health = await getSemanticServiceHealth();
+    res.json({ success: true, data: health });
+  } catch (error) {
+    console.error('Get semantic service health error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      error: {
+        code: error.code || 'INTERNAL_ERROR',
+        message: error.message || 'Failed to reach semantic AI service',
       },
     });
   }

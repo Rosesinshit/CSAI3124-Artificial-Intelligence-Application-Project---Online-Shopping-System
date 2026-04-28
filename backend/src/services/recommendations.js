@@ -1,4 +1,13 @@
 const db = require('../config/database');
+const {
+  SEMANTIC_EMBEDDING_MODEL,
+  buildWeightedEmbedding,
+  cosineSimilarity,
+  getActiveProductEmbeddings,
+  getStoredProductEmbeddings,
+  normalizeSemanticScore,
+  queueProductEmbeddingRefresh,
+} = require('./semanticEmbeddings');
 
 const ACTION_WEIGHTS = {
   VIEW: 1.0,
@@ -10,6 +19,16 @@ const ACTION_WEIGHTS = {
 };
 
 const VALID_ACTION_TYPES = new Set(Object.keys(ACTION_WEIGHTS));
+const PERSONALIZED_WEIGHTS = {
+  collaborative: 0.35,
+  content: 0.20,
+  semantic_ai: 0.25,
+  popularity: 0.20,
+};
+const SIMILAR_WEIGHTS = {
+  similarity: 0.55,
+  semantic_ai: 0.45,
+};
 
 function normalizeLimit(limit, fallback, max = 20) {
   return Math.min(max, Math.max(1, parseInt(limit, 10) || fallback));
@@ -50,12 +69,21 @@ function mergeScoreMaps(scoreMaps) {
         score: 0,
         reasons: new Set(),
         sources: new Set(),
+        source_scores: {},
+        ai_models: new Set(),
       };
 
-      current.score += clampScore(entry.score) * weight;
+      const weightedScore = clampScore(entry.score) * weight;
+      current.score += weightedScore;
       if (reason) current.reasons.add(reason);
       if (entry.reason) current.reasons.add(entry.reason);
-      if (entry.algorithm_type) current.sources.add(entry.algorithm_type);
+      if (entry.algorithm_type) {
+        current.sources.add(entry.algorithm_type);
+        current.source_scores[entry.algorithm_type] = Number(((current.source_scores[entry.algorithm_type] || 0) + weightedScore).toFixed(6));
+      }
+      if (entry.ai_model) {
+        current.ai_models.add(entry.ai_model);
+      }
       merged.set(productId, current);
     }
   }
@@ -262,6 +290,156 @@ async function getContentCandidates(userId, excludeProductIds, limit = 24) {
   return result.rows;
 }
 
+async function getRecentUserProductSignals(userId, limit = 16) {
+  const result = await db.query(
+    `SELECT ub.product_id,
+      SUM(${buildWeightCase()} * CASE WHEN ub.action_time >= NOW() - INTERVAL '30 days' THEN 1.25 ELSE 1 END) AS signal_weight
+     FROM user_behavior ub
+     WHERE ub.user_id = $1
+       AND ub.product_id IS NOT NULL
+     GROUP BY ub.product_id
+     ORDER BY signal_weight DESC, MAX(ub.action_time) DESC
+     LIMIT $2`,
+    [userId, limit]
+  );
+
+  return result.rows.map((row) => ({
+    product_id: Number(row.product_id),
+    signal_weight: clampScore(row.signal_weight),
+  }));
+}
+
+async function getSemanticPersonalizedCandidates(userId, candidateProductIds, limit = 24) {
+  const normalizedCandidateIds = [...new Set(candidateProductIds.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0))];
+  if (!normalizedCandidateIds.length) {
+    return [];
+  }
+
+  const recentSignals = await getRecentUserProductSignals(userId);
+  if (!recentSignals.length) {
+    return [];
+  }
+
+  const signalIds = recentSignals.map((signal) => signal.product_id);
+  const embeddingMap = await getStoredProductEmbeddings([...signalIds, ...normalizedCandidateIds]);
+
+  const missingSignalIds = signalIds.filter((productId) => !embeddingMap.has(productId));
+  const missingCandidateIds = normalizedCandidateIds.filter((productId) => !embeddingMap.has(productId));
+  if (missingSignalIds.length || missingCandidateIds.length) {
+    queueProductEmbeddingRefresh([...missingSignalIds, ...missingCandidateIds]);
+  }
+
+  const userEmbedding = buildWeightedEmbedding(
+    recentSignals.map((signal) => ({
+      embedding: embeddingMap.get(signal.product_id)?.embedding,
+      weight: signal.signal_weight,
+    }))
+  );
+
+  if (!userEmbedding) {
+    return [];
+  }
+
+  return normalizedCandidateIds
+    .map((productId) => {
+      const embeddingRow = embeddingMap.get(productId);
+      if (!embeddingRow?.embedding) {
+        return null;
+      }
+
+      const score = normalizeSemanticScore(cosineSimilarity(userEmbedding, embeddingRow.embedding));
+      return {
+        product_id: productId,
+        score,
+        algorithm_type: 'semantic_ai',
+        reason: 'Matched to your interests',
+        ai_model: embeddingRow.embedding_model || SEMANTIC_EMBEDDING_MODEL,
+      };
+    })
+    .filter((entry) => entry && entry.score > 0)
+    .sort((left, right) => right.score - left.score)
+    .slice(0, limit);
+}
+
+async function getHeuristicSimilarCandidates(productId, limit = 24) {
+  const result = await db.query(
+    `WITH current_product AS (
+       SELECT product_id, category_id
+       FROM product
+       WHERE product_id = $1 AND is_active = true
+     ),
+     shared_tags AS (
+       SELECT ptm.product_id,
+         COUNT(*)::float AS shared_tag_count
+       FROM product_tag_mapping ptm
+       JOIN product_tag_mapping base ON base.tag_id = ptm.tag_id
+       WHERE base.product_id = $1
+         AND ptm.product_id <> $1
+       GROUP BY ptm.product_id
+     ),
+     co_behavior AS (
+       SELECT ub.product_id,
+         COUNT(DISTINCT ub.user_id)::float AS co_behavior_count
+       FROM user_behavior ub
+       JOIN user_behavior seed ON seed.user_id = ub.user_id
+       WHERE seed.product_id = $1
+         AND ub.product_id <> $1
+       GROUP BY ub.product_id
+     )
+     SELECT p.product_id,
+       (CASE WHEN p.category_id = cp.category_id THEN 3 ELSE 0 END)
+         + COALESCE(st.shared_tag_count, 0) * 2
+         + COALESCE(cb.co_behavior_count, 0) * 1.5 AS score,
+       'similarity' AS algorithm_type,
+       CASE
+         WHEN COALESCE(st.shared_tag_count, 0) > 0 THEN 'Similar category and tags'
+         ELSE 'Frequently explored together'
+       END AS reason
+     FROM product p
+     JOIN current_product cp ON TRUE
+     LEFT JOIN shared_tags st ON st.product_id = p.product_id
+     LEFT JOIN co_behavior cb ON cb.product_id = p.product_id
+     WHERE p.product_id <> $1
+       AND p.is_active = true
+       AND p.stock_quantity > 0
+       AND ((CASE WHEN p.category_id = cp.category_id THEN 3 ELSE 0 END)
+         + COALESCE(st.shared_tag_count, 0) * 2
+         + COALESCE(cb.co_behavior_count, 0) * 1.5) > 0
+     ORDER BY score DESC, p.created_at DESC
+     LIMIT $2`,
+    [productId, limit]
+  );
+
+  return result.rows;
+}
+
+async function getSemanticSimilarCandidates(productId, limit = 36) {
+  const embeddingMap = await getStoredProductEmbeddings([productId]);
+  const currentEmbedding = embeddingMap.get(Number(productId));
+
+  if (!currentEmbedding?.embedding) {
+    queueProductEmbeddingRefresh([productId]);
+    return [];
+  }
+
+  const candidates = await getActiveProductEmbeddings({ excludeProductId: productId });
+  if (!candidates.length) {
+    return [];
+  }
+
+  return candidates
+    .map((candidate) => ({
+      product_id: candidate.product_id,
+      score: normalizeSemanticScore(cosineSimilarity(currentEmbedding.embedding, candidate.embedding)),
+      algorithm_type: 'semantic_ai',
+      reason: 'Semantically similar',
+      ai_model: candidate.embedding_model || currentEmbedding.embedding_model || SEMANTIC_EMBEDDING_MODEL,
+    }))
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => right.score - left.score)
+    .slice(0, limit);
+}
+
 async function persistRecommendations(userId, rankedProducts) {
   const client = await db.getClient();
 
@@ -343,6 +521,19 @@ function getPrimaryAlgorithmType(sources) {
   return [...sources][0];
 }
 
+function buildRecommendationMetadata(aggregate, semanticLabel = null) {
+  const semanticScore = clampScore(aggregate?.source_scores?.semantic_ai || 0);
+  const semanticContributed = semanticScore > 0;
+
+  return {
+    semantic_contributed: semanticContributed,
+    semantic_score: Number(semanticScore.toFixed(4)),
+    semantic_label: semanticContributed ? semanticLabel : null,
+    ai_model: semanticContributed ? [...aggregate.ai_models][0] || SEMANTIC_EMBEDDING_MODEL : null,
+    source_scores: aggregate?.source_scores || {},
+  };
+}
+
 async function getPersonalizedRecommendations(userId, limit = 10) {
   const normalizedLimit = normalizeLimit(limit, 10);
   const excludeProductIds = await getExcludedProductIds(userId);
@@ -353,10 +544,21 @@ async function getPersonalizedRecommendations(userId, limit = 10) {
     getPopularCandidates({ limit: normalizedLimit * 3, excludeProductIds }),
   ]);
 
+  const semantic = await getSemanticPersonalizedCandidates(
+    userId,
+    [...new Set([
+      ...collaborative.map((entry) => Number(entry.product_id)),
+      ...content.map((entry) => Number(entry.product_id)),
+      ...popular.map((entry) => Number(entry.product_id)),
+    ])],
+    normalizedLimit * 4
+  );
+
   const merged = mergeScoreMaps([
-    { scores: collaborative, weight: 0.45, reason: 'Recommended from similar shoppers' },
-    { scores: content, weight: 0.35, reason: 'Recommended from your browsing patterns' },
-    { scores: popular, weight: 0.20, reason: 'Popular right now' },
+    { scores: collaborative, weight: PERSONALIZED_WEIGHTS.collaborative, reason: 'Recommended from similar shoppers' },
+    { scores: content, weight: PERSONALIZED_WEIGHTS.content, reason: 'Recommended from your browsing patterns' },
+    { scores: semantic, weight: PERSONALIZED_WEIGHTS.semantic_ai, reason: 'Matched to your interests' },
+    { scores: popular, weight: PERSONALIZED_WEIGHTS.popularity, reason: 'Popular right now' },
   ]);
 
   const rankedIds = [...merged.values()]
@@ -378,12 +580,18 @@ async function getPersonalizedRecommendations(userId, limit = 10) {
   const enriched = products.map((product) => {
     const aggregate = merged.get(product.product_id);
     const promoBoost = product.promotional_price ? 0.35 : 0;
+    const metadata = buildRecommendationMetadata(aggregate, 'Matched to your interests');
 
     return {
       ...product,
       algorithm_type: getPrimaryAlgorithmType(aggregate.sources),
-      recommendation_reason: [...aggregate.reasons][0] || 'Personalized for you',
+      recommendation_reason: metadata.semantic_label || [...aggregate.reasons][0] || 'Personalized for you',
       recommendation_score: Number((aggregate.score + promoBoost).toFixed(4)),
+      semantic_contributed: metadata.semantic_contributed,
+      semantic_score: metadata.semantic_score,
+      semantic_label: metadata.semantic_label,
+      ai_model: metadata.ai_model,
+      recommendation_metadata: metadata,
     };
   }).sort((left, right) => right.recommendation_score - left.recommendation_score);
 
@@ -408,6 +616,17 @@ async function getPopularRecommendations({ limit = 10, categoryId = null, exclud
       algorithm_type: 'popularity',
       recommendation_reason: candidate?.reason || 'Popular with shoppers',
       recommendation_score: Number(clampScore(candidate?.score).toFixed(4)),
+      semantic_contributed: false,
+      semantic_score: 0,
+      semantic_label: null,
+      ai_model: null,
+      recommendation_metadata: {
+        semantic_contributed: false,
+        semantic_score: 0,
+        semantic_label: null,
+        ai_model: null,
+        source_scores: { popularity: Number(clampScore(candidate?.score).toFixed(4)) },
+      },
     };
   });
 }
@@ -415,70 +634,42 @@ async function getPopularRecommendations({ limit = 10, categoryId = null, exclud
 async function getSimilarRecommendations(productId, limit = 6) {
   const normalizedLimit = normalizeLimit(limit, 6);
 
-  const result = await db.query(
-    `WITH current_product AS (
-       SELECT product_id, category_id
-       FROM product
-       WHERE product_id = $1 AND is_active = true
-     ),
-     shared_tags AS (
-       SELECT ptm.product_id,
-         COUNT(*)::float AS shared_tag_count
-       FROM product_tag_mapping ptm
-       JOIN product_tag_mapping base ON base.tag_id = ptm.tag_id
-       WHERE base.product_id = $1
-         AND ptm.product_id <> $1
-       GROUP BY ptm.product_id
-     ),
-     co_behavior AS (
-       SELECT ub.product_id,
-         COUNT(DISTINCT ub.user_id)::float AS co_behavior_count
-       FROM user_behavior ub
-       JOIN user_behavior seed ON seed.user_id = ub.user_id
-       WHERE seed.product_id = $1
-         AND ub.product_id <> $1
-       GROUP BY ub.product_id
-     )
-     SELECT p.product_id,
-       (CASE WHEN p.category_id = cp.category_id THEN 3 ELSE 0 END)
-         + COALESCE(st.shared_tag_count, 0) * 2
-         + COALESCE(cb.co_behavior_count, 0) * 1.5 AS score,
-       'similarity' AS algorithm_type,
-       CASE
-         WHEN COALESCE(st.shared_tag_count, 0) > 0 THEN 'Similar category and tags'
-         ELSE 'Frequently explored together'
-       END AS reason
-     FROM product p
-     JOIN current_product cp ON TRUE
-     LEFT JOIN shared_tags st ON st.product_id = p.product_id
-     LEFT JOIN co_behavior cb ON cb.product_id = p.product_id
-     WHERE p.product_id <> $1
-       AND p.is_active = true
-       AND p.stock_quantity > 0
-       AND ((CASE WHEN p.category_id = cp.category_id THEN 3 ELSE 0 END)
-         + COALESCE(st.shared_tag_count, 0) * 2
-         + COALESCE(cb.co_behavior_count, 0) * 1.5) > 0
-     ORDER BY score DESC, p.created_at DESC
-     LIMIT $2`,
-    [productId, normalizedLimit]
-  );
+  const [heuristicCandidates, semanticCandidates] = await Promise.all([
+    getHeuristicSimilarCandidates(productId, normalizedLimit * 5),
+    getSemanticSimilarCandidates(productId, normalizedLimit * 8),
+  ]);
 
-  if (!result.rows.length) {
+  if (!heuristicCandidates.length && !semanticCandidates.length) {
     return getPopularRecommendations({ limit: normalizedLimit, excludeProductIds: [productId] });
   }
 
-  const summaries = await getProductSummaries(result.rows.map((row) => Number(row.product_id)));
-  const scoreMap = new Map(result.rows.map((row) => [Number(row.product_id), row]));
+  const merged = mergeScoreMaps([
+    { scores: heuristicCandidates, weight: SIMILAR_WEIGHTS.similarity, reason: 'Similar category and shopper behavior' },
+    { scores: semanticCandidates, weight: SIMILAR_WEIGHTS.semantic_ai, reason: 'AI-ranked similar item' },
+  ]);
+
+  const rankedIds = [...merged.values()]
+    .sort((left, right) => right.score - left.score)
+    .slice(0, normalizedLimit * 4)
+    .map((entry) => entry.product_id);
+
+  const summaries = await getProductSummaries(rankedIds);
 
   return summaries.map((product) => {
-    const score = scoreMap.get(product.product_id);
+    const aggregate = merged.get(product.product_id);
+    const metadata = buildRecommendationMetadata(aggregate, 'AI-ranked similar item');
     return {
       ...product,
-      algorithm_type: 'similarity',
-      recommendation_reason: score.reason,
-      recommendation_score: Number(clampScore(score.score).toFixed(4)),
+      algorithm_type: getPrimaryAlgorithmType(aggregate.sources),
+      recommendation_reason: metadata.semantic_label || [...aggregate.reasons][0] || 'Similar to this product',
+      recommendation_score: Number(clampScore(aggregate.score).toFixed(4)),
+      semantic_contributed: metadata.semantic_contributed,
+      semantic_score: metadata.semantic_score,
+      semantic_label: metadata.semantic_label,
+      ai_model: metadata.ai_model,
+      recommendation_metadata: metadata,
     };
-  });
+  }).sort((left, right) => right.recommendation_score - left.recommendation_score).slice(0, normalizedLimit);
 }
 
 async function trackBehavior({ userId, productId = null, actionType, sessionId = null, metadata = {}, client = null }) {

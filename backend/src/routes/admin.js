@@ -5,12 +5,81 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { body, validationResult } = require('express-validator');
 const { slugify, getPagination, paginationMeta } = require('../utils/helpers');
+const {
+  backfillProductEmbeddings,
+  getSemanticServiceHealth,
+  queueProductEmbeddingRefresh,
+  refreshProductEmbedding,
+} = require('../services/semanticEmbeddings');
 const fs = require('fs');
 const path = require('path');
 
 // All admin routes require authentication + admin role
 router.use(authenticate);
 router.use(requireAdmin);
+
+// =============================================
+// Semantic AI Management (Block S)
+// =============================================
+
+router.get('/semantic/health', async (req, res) => {
+  try {
+    const health = await getSemanticServiceHealth();
+    res.json({ success: true, data: health });
+  } catch (error) {
+    console.error('Admin semantic health error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      error: {
+        code: error.code || 'INTERNAL_ERROR',
+        message: error.message || 'Failed to reach semantic AI service',
+      },
+    });
+  }
+});
+
+router.post('/semantic/backfill', async (req, res) => {
+  try {
+    const limit = Number.isInteger(Number(req.body?.limit)) ? Number(req.body.limit) : null;
+    const force = req.body?.force === true;
+    const summary = await backfillProductEmbeddings({ limit, force });
+
+    res.json({ success: true, data: summary });
+  } catch (error) {
+    console.error('Semantic backfill error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      error: {
+        code: error.code || 'INTERNAL_ERROR',
+        message: error.message || 'Failed to backfill semantic embeddings',
+      },
+    });
+  }
+});
+
+router.post('/semantic/products/:id/refresh', async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+    if (!Number.isInteger(productId) || productId < 1) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Valid product id is required' },
+      });
+    }
+
+    const summary = await refreshProductEmbedding(productId, { force: req.body?.force === true });
+    res.json({ success: true, data: summary });
+  } catch (error) {
+    console.error('Semantic product refresh error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      error: {
+        code: error.code || 'INTERNAL_ERROR',
+        message: error.message || 'Failed to refresh product embedding',
+      },
+    });
+  }
+});
 
 // =============================================
 // Product Management (A14-A17)
@@ -147,6 +216,8 @@ router.post('/products', [
       }
     }
 
+    queueProductEmbeddingRefresh([product.product_id], { force: true });
+
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     console.error('Create product error:', error);
@@ -227,6 +298,8 @@ router.put('/products/:id', [
       }
     }
 
+    queueProductEmbeddingRefresh([Number(id)], { force: true });
+
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Update product error:', error);
@@ -268,6 +341,9 @@ router.put('/products/:id/status', [
         success: false,
         error: { code: 'NOT_FOUND', message: 'Product not found' }
       });
+    }
+    if (req.body.is_active === true) {
+      queueProductEmbeddingRefresh([Number(req.params.id)]);
     }
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {

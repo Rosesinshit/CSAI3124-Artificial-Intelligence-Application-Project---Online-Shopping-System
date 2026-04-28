@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS promotion CASCADE;
 DROP TABLE IF EXISTS wishlist_item CASCADE;
 DROP TABLE IF EXISTS wishlist CASCADE;
 DROP TABLE IF EXISTS price_alert CASCADE;
+DROP TABLE IF EXISTS product_embedding CASCADE;
 DROP TABLE IF EXISTS recommendation CASCADE;
 DROP TABLE IF EXISTS user_behavior CASCADE;
 DROP TABLE IF EXISTS order_status_history CASCADE;
@@ -278,7 +279,7 @@ CREATE TABLE recommendation (
     user_id INT NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
     product_id INT NOT NULL REFERENCES product(product_id) ON DELETE CASCADE,
     score DECIMAL(10, 4) NOT NULL,
-    algorithm_type VARCHAR(50) NOT NULL CHECK (algorithm_type IN ('hybrid', 'collaborative', 'content', 'popularity', 'similarity')),
+    algorithm_type VARCHAR(50) NOT NULL CHECK (algorithm_type IN ('hybrid', 'collaborative', 'content', 'popularity', 'similarity', 'semantic_ai')),
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_clicked BOOLEAN DEFAULT FALSE
 );
@@ -286,6 +287,24 @@ CREATE TABLE recommendation (
 CREATE INDEX idx_recommendation_user ON recommendation(user_id);
 CREATE INDEX idx_recommendation_product ON recommendation(product_id);
 CREATE INDEX idx_recommendation_generated_at ON recommendation(generated_at DESC);
+
+-- ============================================
+-- Product Semantic Embeddings (Block S AI)
+-- ============================================
+CREATE TABLE product_embedding (
+    product_id INT PRIMARY KEY REFERENCES product(product_id) ON DELETE CASCADE,
+    embedding_model VARCHAR(255) NOT NULL,
+    embedding_version VARCHAR(50) NOT NULL DEFAULT 'v1',
+    source_text_hash VARCHAR(64) NOT NULL,
+    source_text TEXT NOT NULL,
+    embedding_dimensions INT NOT NULL,
+    embedding_payload JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_product_embedding_model ON product_embedding(embedding_model);
+CREATE INDEX idx_product_embedding_updated_at ON product_embedding(updated_at DESC);
 
 -- ============================================
 -- Price Drop Notifications (Block U)

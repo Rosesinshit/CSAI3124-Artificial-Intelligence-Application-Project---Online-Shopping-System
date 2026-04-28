@@ -106,7 +106,7 @@ export default function HomePage() {
               </h2>
               <p className="text-xs text-apple-gray">
                 {user
-                  ? 'Generated from your browsing, cart, wish list, and purchase patterns.'
+                  ? 'Generated from your browsing patterns, shopper signals, and semantic AI matching.'
                   : 'Popular products based on recent shopper activity.'}
               </p>
             </div>

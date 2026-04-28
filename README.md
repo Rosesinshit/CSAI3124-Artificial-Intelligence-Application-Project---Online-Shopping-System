@@ -24,8 +24,9 @@
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 18.3, React Router 6.26, Vite 5.4, Tailwind CSS 3.4, Axios |
-| Backend | Node.js, Express 4.21, pg (PostgreSQL driver), JWT, bcrypt, multer |
+| Backend | Node.js, Express 4.21, pg (PostgreSQL driver), JWT, bcrypt, multer, semantic AI integration |
 | Database | PostgreSQL 14+ |
+| AI Service | FastAPI, sentence-transformers, torch, all-MiniLM-L6-v2 |
 | Design | Apple-style glass morphism UI with custom Tailwind theme |
 
 ---
@@ -37,6 +38,10 @@
 cd backend && npm install
 cd ../frontend && npm install
 
+# 1b. Install Python AI service dependencies in the user's conda env
+conda activate nlp_train
+pip install -r backend/nlp_service/requirements.txt
+
 # 2. Set up PostgreSQL
 #    Create a database named "shopping_db" (user: postgres, password: postgres)
 
@@ -45,7 +50,14 @@ cd ../backend
 node src/database/init.js    # Creates all tables
 node src/database/seed.js    # Inserts demo data
 
+# 3b. For existing databases, run the semantic migration instead of reinitializing
+npm run db:migrate:semantic
+
 # 4. Start servers
+conda activate nlp_train
+uvicorn backend.nlp_service.app:app --host 127.0.0.1 --port 8001
+
+cd backend
 node src/server.js           # Backend → http://localhost:5000
 cd ../frontend
 npm run dev                  # Frontend → http://localhost:3000
@@ -148,8 +160,9 @@ PostgreSQL connection pool via `pg.Pool`. Reads from environment variables with 
 
 | File | Purpose |
 |------|---------|
-| `schema.sql` | Complete DDL for 19 tables with indexes, foreign keys, recommendation/event tracking tables, and an `update_updated_at_column` trigger. Recreates the schema from scratch for clean local resets. |
+| `schema.sql` | Complete DDL for 20 tables with indexes, foreign keys, recommendation/event tracking tables, semantic product embeddings, and an `update_updated_at_column` trigger. Recreates the schema from scratch for clean local resets. |
 | `init.js` | CLI script — reads `schema.sql`, executes it against the database, creates `uploads/products/` directory, then exits. Run once before first use. |
+| `migrateSemanticRecommendations.js` | Non-destructive migration that adds semantic embedding persistence and updates recommendation algorithm constraints for existing databases. |
 | `seed.js` | CLI script — truncates all data, then inserts: 2 users (admin + customer), 5 categories + 4 subcategories, 8 tags, 10 products with images/attributes/tags, and 2 active promotions linked to products. Transactional (rolls back on failure). |
 
 ### Middleware — `middleware/`
@@ -173,6 +186,7 @@ PostgreSQL connection pool via `pg.Pool`. Reads from environment variables with 
 | `wishlist.js` | `/api/v1/wishlist` | Auth | `GET /` (items with current price + `price_dropped` flag), `POST /items` (add with price snapshot), `DELETE /items/:id`, `GET /check/:productId`, price alerts (`POST /price-alerts`, `DELETE /price-alerts/:id`), `GET /notifications` (price drops + triggered alerts). |
 | `promotions.js` | `/api/v1/promotions` | Mixed | Public: `GET /` (active promotions), `GET /:id` (detail), `GET /:id/products`. Admin: `POST /`, `PUT /:id`, `DELETE /:id`, `POST /:id/products` (link product), `DELETE /:id/products/:productId` (unlink). Supports percentage/fixed/special_price types. |
 | `recommendations.js` | `/api/v1/recommendations` | Mixed | Auth: `GET /` (hybrid personalized recommendations). Public: `GET /popular`, `GET /similar/:productId`. Uses collaborative, content-based, and popularity scoring with stock/promotional filtering. |
+| `semanticEmbeddings.js` | internal service | Server | Calls the FastAPI embedding service, persists transformer embeddings, computes semantic similarity, and supplies AI metadata to recommendation responses. |
 | `behaviors.js` | `/api/v1/behaviors` | Auth | `POST /` to persist recommendation training events (`VIEW`, `ADD_TO_CART`, `PURCHASE`, `WISHLIST_ADD`, `SEARCH`, `CLICK_RECOMMENDATION`) with session and metadata payloads. |
 | `seo.js` | `/api/v1/seo` | Public | `GET /product/:id` (full SEO metadata), plus root-level `GET /sitemap.xml` and `GET /robots.txt`. See [SEO Implementation](#seo-implementation). |
 
